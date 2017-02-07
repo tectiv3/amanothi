@@ -27,10 +27,12 @@ export default class Main extends Component {
         var rowHash = Math.abs(hashCode(rowData));
         return (
             <TouchableHighlight onPress={this._pressRow.bind(this, rowID)} >
-                <View style={styles.row}>
-                    <Text style={styles.text}>
-                        {rowData + ' - ' + LOREM_IPSUM.substr(0, rowHash % 301 + 10)}
-                    </Text>
+                <View style={styles.listItem}>
+                    <Text numberOfLines={1} style={styles.titleLabel}>{rowData + ' - ' + LOREM_IPSUM.substr(0, rowHash % 301 + 10)}</Text>
+                    <View style={styles.infoContainer}>
+                        <Text style={styles.timeLabel}>16:20</Text>
+                        <Text numberOfLines={1} style={styles.previewLabel}>{LOREM_IPSUM.substr(100, rowHash % 301 + 10)}</Text>
+                    </View>
                 </View>
             </TouchableHighlight>
         );
@@ -65,7 +67,7 @@ export default class Main extends Component {
         <View
           key={`${sectionID}-${rowID}`}
           style={{
-            height: adjacentRowHighlighted ? 4 : 1,
+            height: 0,
             backgroundColor: adjacentRowHighlighted ? '#3B5998' : '#CCCCCC',
           }}
         />
@@ -74,17 +76,20 @@ export default class Main extends Component {
 
     render() {
         return(
-            <View>
+        <View style={styles.container}>
+            <View style={styles.listContainer}>
             <ListView
                 dataSource={this.state.dataSource}
                 renderRow={this._renderRow.bind(this)}
-                renderSeparator={this._renderSeparator}
+
                 renderHeader={() => <Header />}
             />
             </View>
+        </View>
         );
     }
 }
+// renderSeparator={this._renderSeparator}
 
 var LOREM_IPSUM = 'Lorem ipsum dolor sit amet, ius ad pertinax oportere accommodare, an vix civibus corrumpit referrentur. Te nam case ludus inciderint, te mea facilisi adipiscing. Sea id integre luptatum. In tota sale consequuntur nec. Erat ocurreret mei ei. Eu paulo sapientem vulputate est, vel an accusam intellegam interesset. Nam eu stet pericula reprimique, ea vim illud modus, putant invidunt reprehendunt ne qui.';
 
@@ -97,6 +102,12 @@ var hashCode = function(str) {
 };
 
 var styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'stretch',
+        backgroundColor: '#ffffff'
+    },
     row: {
         flexDirection: 'row',
         justifyContent: 'center',
@@ -128,6 +139,45 @@ var styles = StyleSheet.create({
     backRightBtnRight: {
         backgroundColor: 'red',
         right: 0
+    },
+    listContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'stretch',
+    },
+    listItem: {
+      backgroundColor: '#f9f9f7',
+      borderBottomWidth: 0.5,
+      borderColor: '#D0DBE4',
+      padding: 10,
+      paddingRight: 20,
+      paddingLeft: 25
+    },
+    titleLabel: {
+      fontSize: 16,
+      fontWeight: '400',
+      fontFamily: 'System',
+      color: '#232527',
+    //   lineHeight: 19
+    },
+    infoContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        marginTop: 3
+    },
+    timeLabel: {
+      fontSize: 15,
+      fontWeight: '400',
+      color: 'rgba(0,0,0,0.6)',
+    //   width: 80,
+    },
+    previewLabel: {
+      fontSize: 15,
+      paddingRight: 50,
+      fontWeight: '400',
+      color: 'rgba(0,0,0,0.5)',
+      marginLeft: 10
     },
 
 });

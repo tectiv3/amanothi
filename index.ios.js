@@ -18,7 +18,7 @@ export default class NavigatorIOSApp extends Component {
         super(props);
         this.routes = {
         "main" : {
-            title: '',
+            title: 'Notes',
             index: 0,
             component: MainScene,
             leftButtonSystemIcon: 'organize',

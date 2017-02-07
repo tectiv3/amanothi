@@ -58,6 +58,7 @@ var styles = StyleSheet.create({
         flex: 1,
         alignItems: 'stretch',
         marginTop: 10,
+        backgroundColor: '#f9f9f7',
     },
     input: {
         padding: 10,
@@ -67,5 +68,6 @@ var styles = StyleSheet.create({
         alignItems: 'flex-end',
         flexDirection: 'column',
         justifyContent: 'flex-end',
+        backgroundColor: '#f9f9f7',
     },
 });
