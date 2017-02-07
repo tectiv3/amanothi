@@ -26,12 +26,6 @@ export default class Account extends Component {
         }
     }
 
-    redirect(routeName, accessToken){
-        this.props.navigator.push({
-            name: routeName
-        });
-    }
-
     storeToken(responseData){
         AsyncStorage.setItem(ACCESS_TOKEN, responseData, (err)=> {
             if(err){
@@ -67,7 +61,7 @@ export default class Account extends Component {
     //       console.log(accessToken);
     //       //On success we will store the access_token in the AsyncStorage
           this.storeToken("{valid: true}");
-          this.redirect("Home");
+          this.props.navigator.pop();
     //   } else {
     //       //Handle error
     //       let error = res;

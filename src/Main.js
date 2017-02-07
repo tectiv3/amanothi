@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Text, ListView, TouchableHighlight, StyleSheet } from 'react-native';
+import { View, Text, ListView, TouchableHighlight, StyleSheet, Keyboard } from 'react-native';
 
 import Header from './subviews/Header';
 import NoteScene from './Note';
@@ -47,16 +47,15 @@ export default class Main extends Component {
 
     _pressRow(rowID: number) {
         this._pressData[rowID] = !this._pressData[rowID];
-        this.setState({dataSource: this.state.dataSource.cloneWithRows(
-            this._genRows(this._pressData)
-        )});
+        // this.setState({dataSource: this.state.dataSource.cloneWithRows(
+        //     this._genRows(this._pressData)
+        // )});
         const nextRoute = {
             component: NoteScene,
             title: 'Note',
             passProps: { note: this.state.dataSource[rowID] },
-            barTintColor: '#28354a',
-            titleTextColor: '#75c38d',
-            tintColor: '#75c38d',
+            rightButtonSystemIcon: 'done',
+            onRightButtonPress: () => Keyboard.dismiss(),
         };
         this._handleNextPress(nextRoute);
     }

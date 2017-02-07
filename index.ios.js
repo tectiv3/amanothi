@@ -5,6 +5,7 @@ import { AppRegistry,
         StyleSheet,
         Text,
         ActivityIndicator,
+        Keyboard,
         } from 'react-native';
 
 import MainScene from './src/Main';
@@ -15,7 +16,50 @@ export default class NavigatorIOSApp extends Component {
 
     constructor(props) {
         super(props);
+        this.routes = {
+        "main" : {
+            title: '',
+            index: 0,
+            component: MainScene,
+            leftButtonSystemIcon: 'organize',
+            onLeftButtonPress: ()  => this.refs.nav.push(this.routes["account"]),
+            rightButtonSystemIcon: 'compose',
+            onRightButtonPress: () => this.refs.nav.push(this.routes["create"]),
+            passProps: {
+                routes: 'sdsd'
+            }
+        },
+        "account": {
+            title: 'Account',
+            index: 1,
+            component: AccountScene,
+        },
+        "create": {
+            title: 'New note',
+            index: 2,
+            component: NoteScene,
+            rightButtonSystemIcon: 'done',
+            onRightButtonPress: () => Keyboard.dismiss(),
+        },
+        "update": {
+            title: 'Edit note',
+            index: 3,
+            component: NoteScene,
+            rightButtonSystemIcon: 'done',
+            onRightButtonPress: () => Keyboard.dismiss(),
+        },
+    };
+
         this.state = { loaded: true}
+    }
+
+    renderScene(route, navigator) {
+        //unused
+        console.log(route);
+        var route = this.routes.find((r, route) => { return r.index == route;});
+        console.log(route);
+        var Component = route.component;
+        return <Component {...route.passProps} route={route} navigator={navigator} />;
     }
 
     renderLoadingView() {
@@ -30,45 +74,16 @@ export default class NavigatorIOSApp extends Component {
         );
     }
 
-    _handleRightNavigationRequest() {
-        this.refs.nav.push({
-            component: NoteScene,
-            title: 'New Note',
-            passProps: { myProp: 'genius' },
-            barTintColor: '#28354a',
-            titleTextColor: '#75c38d',
-            tintColor: '#75c38d',
-        });
-    }
-
-    _handleLeftNavigationRequest() {
-        this.refs.nav.push({
-            component: AccountScene,
-            title: 'Account',
-            passProps: { myProp: 'genius' },
-            barTintColor: '#28354a',
-            titleTextColor: '#75c38d',
-            tintColor: '#75c38d',
-        });
-    }
-
     renderListView() {
         return (
             <NavigatorIOS
                 ref='nav'
-                initialRoute = {{
-                    component: MainScene,
-                    title: '',
-                    name: "Home",
-                    rightButtonSystemIcon: 'compose',
-                    onRightButtonPress: () => this._handleRightNavigationRequest(),
-                    leftButtonSystemIcon: 'organize',
-                    onLeftButtonPress: () => this._handleLeftNavigationRequest(),
-                    barTintColor: '#28354a',
-                    titleTextColor: '#75c38d',
-                    tintColor: '#75c38d',
-                }}
-                style={{flex: 1}}
+                initialRoute={this.routes["main"]}
+                style={styles.page}
+                barTintColor='#28354a'
+                titleTextColor='#75c38d'
+                tintColor='#75c38d'
+                routes={this.routes}
             />
         );
     }
@@ -81,7 +96,11 @@ export default class NavigatorIOSApp extends Component {
     }
 }
 
+
 var styles = StyleSheet.create({
+    page: {
+        flex: 1,
+    },
     container: {
         flex: 1,
         flexDirection: 'column',
