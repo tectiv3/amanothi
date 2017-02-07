@@ -35,6 +35,9 @@ export default class NavigatorIOSApp extends Component {
             component: NoteScene,
             title: 'New Note',
             passProps: { myProp: 'genius' },
+            barTintColor: '#28354a',
+            titleTextColor: '#75c38d',
+            tintColor: '#75c38d',
         });
     }
 
@@ -43,6 +46,9 @@ export default class NavigatorIOSApp extends Component {
             component: AccountScene,
             title: 'Account',
             passProps: { myProp: 'genius' },
+            barTintColor: '#28354a',
+            titleTextColor: '#75c38d',
+            tintColor: '#75c38d',
         });
     }
 
@@ -58,7 +64,9 @@ export default class NavigatorIOSApp extends Component {
                     onRightButtonPress: () => this._handleRightNavigationRequest(),
                     leftButtonSystemIcon: 'organize',
                     onLeftButtonPress: () => this._handleLeftNavigationRequest(),
-                    // barTintColor: '#48BBEC'
+                    barTintColor: '#28354a',
+                    titleTextColor: '#75c38d',
+                    tintColor: '#75c38d',
                 }}
                 style={{flex: 1}}
             />

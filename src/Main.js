@@ -54,7 +54,9 @@ export default class Main extends Component {
             component: NoteScene,
             title: 'Note',
             passProps: { note: this.state.dataSource[rowID] },
-            barTintColor: 'skyblue'
+            barTintColor: '#28354a',
+            titleTextColor: '#75c38d',
+            tintColor: '#75c38d',
         };
         this._handleNextPress(nextRoute);
     }

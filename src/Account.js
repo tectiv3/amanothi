@@ -123,11 +123,11 @@ const styles = StyleSheet.create({
     padding: 4,
     fontSize: 18,
     borderWidth: 1,
-    borderColor: '#48bbec'
+    borderColor: '#75c38d'
   },
   button: {
     height: 50,
-    backgroundColor: '#48BBEC',
+    backgroundColor: '#75c38d',
     alignSelf: 'stretch',
     marginTop: 10,
     justifyContent: 'center'
