@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { View, Text, ListView, TouchableHighlight, StyleSheet } from 'react-native';
-const FlatList = require('FlatList');
+
 import Header from './subviews/Header';
 import NoteScene from './Note';
 
