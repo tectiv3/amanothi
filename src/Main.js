@@ -52,8 +52,8 @@ export default class Main extends Component {
         )});
         const nextRoute = {
             component: NoteScene,
-            title: this._notes[rowID].title,
-            passProps: { note: this.notes[rowID] },
+            title: 'Note',
+            passProps: { note: this.state.dataSource[rowID] },
             barTintColor: 'skyblue'
         };
         this._handleNextPress(nextRoute);
