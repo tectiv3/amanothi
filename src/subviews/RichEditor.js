@@ -9,6 +9,7 @@ export default class RichEditor extends Component {
         super(props);
         this.getHTML = this.getHTML.bind(this);
         this.setFocusHandlers = this.setFocusHandlers.bind(this);
+        console.log(props.title);
     }
 
     render() {
@@ -23,9 +24,9 @@ export default class RichEditor extends Component {
                 editorInitializedCallback={() => this.onEditorInitialized()}
                 customCSS="body { padding-left:0px; padding-right:0px; }"
                 enableOnChange={true}
-                hiddenTitle={this.props.title != undefined}
+                hiddenTitle={this.props.title == undefined}
             />
-            <RichTextToolbar getEditor={() => this.richtext} selectedButtonStyle={styles.selectedButton} />
+            <RichTextToolbar getEditor={() => this.richtext} selectedButtonStyle={{backgroundColor: 'skyblue'}} />
             {Platform.OS === 'ios' && <KeyboardSpacer/>}
           </View>
       );
