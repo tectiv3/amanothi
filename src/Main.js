@@ -15,6 +15,10 @@ export default class Main extends Component {
         this._notes = [];
     }
 
+    componentDidMount () {
+        this.refs.list.scrollTo(45);
+    }
+
     _handleBackPress() {
         this.props.navigator.pop();
     }
@@ -78,7 +82,7 @@ export default class Main extends Component {
         return(
         <View style={styles.container}>
             <View style={styles.listContainer}>
-            <ListView
+            <ListView ref="list"
                 dataSource={this.state.dataSource}
                 renderRow={this._renderRow.bind(this)}
 
