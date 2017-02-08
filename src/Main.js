@@ -52,7 +52,6 @@ export default class Main extends Component {
         this.setState({
             dataSource: this.state.dataSource.cloneWithRows(plain)
         });
-        this.refs.list.forceUpdate();
         return plain;
     }
 

@@ -25,6 +25,7 @@ export default class Note extends Component {
     }
 
     onChange(text) {
+        if (this.state.note.text == text) return;
         this.state.note.text = text;
         this.setState({note: this.state.note});
         if (this.state.note.id) {
