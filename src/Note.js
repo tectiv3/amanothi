@@ -4,6 +4,8 @@ import { View, Text, Platform, StyleSheet, TextInput } from 'react-native';
 import RichEditor from './subviews/RichEditor';
 import Editor from './subviews/Editor';
 
+import Storage from './Storage';
+
 export default class Note extends Component {
 
     static defaultProps = {
@@ -19,7 +21,17 @@ export default class Note extends Component {
         this.state = {
             note: props.note
         };
-        console.log(this.state.note)
+        this.onChange = this.onChange.bind(this);
+    }
+
+    onChange(text) {
+        this.state.note.text = text;
+        this.setState({note: this.state.note});
+        if (this.state.note.id) {
+            Storage.updateNote(this.state.note);
+        } else {
+            Storage.createNote(this.state.note);
+        }
     }
 
     render() {
@@ -27,6 +39,7 @@ export default class Note extends Component {
             <Editor title={this.state.note.title}
                     text={this.state.note.text}
                     time={this.state.note.time}
+                    onChange={this.onChange}
             />
         );
     }

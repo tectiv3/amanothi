@@ -2,9 +2,11 @@ import React, { Component } from 'react';
 import { AppRegistry, TextInput, View, ScrollView, StyleSheet, DeviceEventEmitter, LayoutAnimation, Dimensions, Keyboard } from 'react-native';
 
 export default class Editor extends Component {
+
     constructor(props) {
         super(props);
         this.state = { text: props.text };
+        this.handleChange = this.handleChange.bind(this);
     }
 
     componentWillMount () {
@@ -13,8 +15,9 @@ export default class Editor extends Component {
     }
 
     componentWillUnmount () {
-        this.keyboardDidShowListener.remove()
-        this.keyboardDidHideListener.remove()
+        this.keyboardDidShowListener.remove();
+        this.keyboardDidHideListener.remove();
+        this.props.onChange(this.state.text);
     }
 
     keyboardDidShow (e) {
@@ -22,14 +25,20 @@ export default class Editor extends Component {
         this.setState({
             height: newSize,
         })
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     }
 
     keyboardDidHide (e) {
         this.setState({
             height: Dimensions.get('window').height
         })
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        this.props.onChange(this.state.text);
+    }
+
+    handleChange (text) {
+        this.setState({text});
+        this.props.onChange(text);
     }
 
     render() {
@@ -42,7 +51,10 @@ export default class Editor extends Component {
                 <ScrollView keyboardDismissMode='interactive'>
                     <TextInput
                         style={[styles.input, {height:this.state.height}]}
-                        onChangeText={(text) => this.setState({text})}
+                        allowFontScaling={true}
+                        onChangeText={(text) => {
+                            this.setState({text});
+                        }}
                         value={this.state.text}
                         multiline={true}
                         autoFocus={true}
@@ -64,6 +76,7 @@ var styles = StyleSheet.create({
         padding: 10,
         paddingTop: 0,
         fontSize: 18,
+        fontWeight: '200',
         fontFamily: 'System',
         alignItems: 'flex-end',
         flexDirection: 'column',

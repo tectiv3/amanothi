@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { View, Text, TouchableHighlight, StyleSheet } from 'react-native';
+import moment from 'moment';
 
 export default class NoteItem extends Component {
     constructor(props) {
@@ -15,10 +16,10 @@ export default class NoteItem extends Component {
         return (
             <TouchableHighlight onPress={this.handlePress} >
                 <View style={styles.listItem}>
-                    <Text numberOfLines={1} style={styles.titleLabel}>{this.props.note.title}</Text>
+                    <Text numberOfLines={1} style={styles.titleLabel}>{this.props.note.title ? this.props.note.title : this.props.note.text}</Text>
                     <View style={styles.infoContainer}>
-                        <Text style={styles.timeLabel}>{this.props.note.time}</Text>
-                        <Text numberOfLines={1} style={styles.previewLabel}>{this.props.note.text.substr(100, 50)}</Text>
+                        <Text style={styles.timeLabel}>{moment((this.props.note.updated)).fromNow()}</Text>
+                        <Text numberOfLines={1} style={styles.previewLabel}>{this.props.note.text ? this.props.note.text.substr(10, 30) : 'No additional content'}</Text>
                     </View>
                 </View>
             </TouchableHighlight>
@@ -38,7 +39,8 @@ var styles = StyleSheet.create({
       borderColor: '#D0DBE4',
       padding: 10,
       paddingRight: 20,
-      paddingLeft: 25
+      paddingLeft: 25,
+      height: 61
     },
     titleLabel: {
       fontSize: 16,

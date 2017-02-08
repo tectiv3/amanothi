@@ -11,6 +11,7 @@ import { AppRegistry,
 import MainScene from './src/Main';
 import AccountScene from './src/Account';
 import NoteScene from './src/Note';
+import Storage from './src/Storage';
 
 export default class NavigatorIOSApp extends Component {
 
@@ -48,16 +49,15 @@ export default class NavigatorIOSApp extends Component {
             },
         };
 
-        this.state = { loaded: true}
+        this.state = { loaded: true }
     }
 
-    renderScene(route, navigator) {
-        //unused
-        console.log(route);
-        var route = this.routes.find((r, route) => { return r.index == route;});
-        console.log(route);
-        var Component = route.component;
-        return <Component {...route.passProps} route={route} navigator={navigator} />;
+    componentWillMount() {
+        // Storage.addChangeListener(this.onChange);
+    }
+
+    componentWillUnmount() {
+        // Storage.removeChangeListener(this.onChange);
     }
 
     renderLoadingView() {
