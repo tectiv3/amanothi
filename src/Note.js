@@ -6,11 +6,33 @@ import Editor from './subviews/Editor';
 
 export default class Note extends Component {
 
+    static defaultProps = {
+        note: {
+            title: "",
+            text: "",
+            time: 0
+        }
+    }
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            note: props.note
+        };
+        console.log(this.state.note)
+    }
+
     render() {
         return (
-            <Editor title={'Title!!'}
-                    text={'Hello <b>World</b> <p>this is a new paragraph</p> <p>this is another new paragraph</p>'}
+            <Editor title={this.state.note.title}
+                    text={this.state.note.text}
+                    time={this.state.note.time}
             />
         );
     }
+}
+
+
+Note.propTypes = {
+    note:    React.PropTypes.object
 }

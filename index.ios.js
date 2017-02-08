@@ -17,38 +17,36 @@ export default class NavigatorIOSApp extends Component {
     constructor(props) {
         super(props);
         this.routes = {
-        "main" : {
-            title: 'Notes',
-            index: 0,
-            component: MainScene,
-            leftButtonSystemIcon: 'organize',
-            onLeftButtonPress: ()  => this.refs.nav.push(this.routes["account"]),
-            rightButtonSystemIcon: 'compose',
-            onRightButtonPress: () => this.refs.nav.push(this.routes["create"]),
-            passProps: {
-                routes: 'sdsd'
-            }
-        },
-        "account": {
-            title: 'Account',
-            index: 1,
-            component: AccountScene,
-        },
-        "create": {
-            title: 'New note',
-            index: 2,
-            component: NoteScene,
-            rightButtonSystemIcon: 'done',
-            onRightButtonPress: () => Keyboard.dismiss(),
-        },
-        "update": {
-            title: 'Edit note',
-            index: 3,
-            component: NoteScene,
-            rightButtonSystemIcon: 'done',
-            onRightButtonPress: () => Keyboard.dismiss(),
-        },
-    };
+            "main" : {
+                title: 'Notes',
+                index: 0,
+                component: MainScene,
+                leftButtonSystemIcon: 'organize',
+                onLeftButtonPress: ()  => this.refs.nav.push(this.routes["account"]),
+                rightButtonSystemIcon: 'compose',
+                onRightButtonPress: () => this.refs.nav.push(this.routes["create"]),
+                titleTextColor: 'rgba(0,0,0,0)'
+            },
+            "account": {
+                title: 'Account',
+                index: 1,
+                component: AccountScene,
+            },
+            "create": {
+                title: 'New note',
+                index: 2,
+                component: NoteScene,
+                rightButtonSystemIcon: 'done',
+                onRightButtonPress: () => Keyboard.dismiss(),
+            },
+            "update": {
+                title: 'Edit note',
+                index: 3,
+                component: NoteScene,
+                rightButtonSystemIcon: 'done',
+                onRightButtonPress: () => Keyboard.dismiss(),
+            },
+        };
 
         this.state = { loaded: true}
     }
