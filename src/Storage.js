@@ -36,6 +36,7 @@ var Storage = assign({}, EventEmitter.prototype, {
         note.updated = note.created;
         note.id = Math.floor(Math.random() * 9999) + 1;
         _notes[note.id] = note;
+        this.emitChange();
         return updateAsyncStore();
     },
 

@@ -12,7 +12,7 @@ export default class Note extends Component {
         note: {
             title: "",
             text: "",
-            time: 0
+            updated: 0
         }
     }
 
@@ -29,8 +29,10 @@ export default class Note extends Component {
         this.state.note.text = text;
         this.setState({note: this.state.note});
         if (this.state.note.id) {
+            console.log("Updating note.");
             Storage.updateNote(this.state.note);
         } else {
+            console.log("Creating new note");
             Storage.createNote(this.state.note);
         }
     }

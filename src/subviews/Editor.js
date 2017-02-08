@@ -44,7 +44,6 @@ export default class Editor extends Component {
     render() {
         return (
             <View style={styles.page} onLayout={(ev) => {
-                // 80 is for the navbar on top
                 var fullHeight = ev.nativeEvent.layout.height - 60;
                 this.setState({height: fullHeight, fullHeight: fullHeight});
             }}>
@@ -57,7 +56,7 @@ export default class Editor extends Component {
                         }}
                         value={this.state.text}
                         multiline={true}
-                        autoFocus={true}
+                        autoFocus={!this.state.text}
                     />
                 </ScrollView>
             </View>

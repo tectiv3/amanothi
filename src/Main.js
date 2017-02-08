@@ -21,7 +21,7 @@ export default class Main extends Component {
         this.onChange = () => {
             var notes = this.getNotesList();
             this.setState({notes});
-            console.log("On change:", notes);
+            console.log("On change!");
             this.sortList(notes);
         };
     }
@@ -56,13 +56,13 @@ export default class Main extends Component {
     }
 
     getNotesList() {
-        console.log('GET FROM STORAGE');
+        console.log('Load from storage.');
         return Storage.getAll();
     }
 
     pressRow(noteID) {
         var note = this.state.notes[noteID];//.find((n) => {return n.id == noteID;});[noteID];
-        console.log("CLICK", noteID);
+        console.log("Row click: ", noteID);
         const nextRoute = {
             component: NoteScene,
             title: note.title ? note.title : 'Note',
