@@ -9,7 +9,7 @@ import Storage from './Storage';
 export default class Main extends Component {
     constructor(props) {
         super(props);
-        let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+        let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => true});
         var notes = this.getNotesList();
         this.state = {
             dataSource: ds.cloneWithRows([]),
