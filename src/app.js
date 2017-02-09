@@ -11,9 +11,8 @@ import Storage from './Storage';
 
 Navigation.registerComponent('MainScreen', () => Main);
 Navigation.registerComponent('NoteScreen', () => Note);
-Navigation.registerComponent('AccountScreen', () => Account);
-Navigation.registerComponent('SideMenu', () => SideMenu);
-
+// Navigation.registerComponent('AccountScreen', () => Account);
+// Navigation.registerComponent('SideMenu', () => SideMenu);
 Navigation.startSingleScreenApp({
     screen: {
         screen: 'MainScreen',
@@ -29,11 +28,11 @@ Navigation.startSingleScreenApp({
                 drawUnderNavBar: false,
             }
     },
-    drawer: {
-        left: {
-            screen: 'SideMenu'
-        }
-    }
+    // drawer: {
+    //     left: {
+    //         screen: 'SideMenu'
+    //     }
+    // }
 });
 /*
 import React, { Component } from 'react';

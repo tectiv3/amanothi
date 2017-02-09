@@ -14,7 +14,14 @@ export default class Note extends Component {
         }]
     }
     static navigatorStyle = {
-        navBarTextColor: '#75c38d'
+        navBarBackgroundColor: 'rgba(40,53,74,0.8)',
+        navBarTranslucent: true,
+        navBarTextColor: '#75c38d',
+        navBarSubtitleTextColor: '#75c38d',
+        navBarButtonColor: '#75c38d',
+        statusBarTextColorSchemeSingleScreen: 'light',
+        navBarNoBorder: true,
+        drawUnderNavBar: false,
     }
 
     static defaultProps = {
