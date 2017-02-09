@@ -15,14 +15,27 @@ const ACCESS_TOKEN = 'access_token';
 import MainScene from './Main';
 
 export default class Account extends Component {
+    static navigatorButtons = {
+      leftButtons: [{
+        title: 'Close',
+        id: 'close'
+      }]
+    };
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             email: "",
             password: "",
             error: "",
             showProgress: false,
+        }
+        this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+    }
+
+    onNavigatorEvent(event) {
+        if (event.id == 'close') {
+            this.props.navigator.dismissModal();
         }
     }
 
@@ -61,7 +74,8 @@ export default class Account extends Component {
     //       console.log(accessToken);
     //       //On success we will store the access_token in the AsyncStorage
           this.storeToken("{valid: true}");
-          this.props.navigator.pop();
+          this.props.navigator.dismissModal();
+        //   this.props.navigator.popToRoot();
     //   } else {
     //       //Handle error
     //       let error = res;

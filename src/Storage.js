@@ -54,6 +54,7 @@ var Storage = assign({}, EventEmitter.prototype, {
     },
 
     emitChange: function() {
+        console.log("Change fire!");
         this.emit('change');
     },
 

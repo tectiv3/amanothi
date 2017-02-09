@@ -7,13 +7,17 @@ import NoteScene from './Note';
 import Storage from './Storage';
 
 export default class Main extends Component {
+    static navigatorButtons = {
+        rightButtons: [{
+            icon: require('../img/navicon_edit.png'),
+            id: 'create'
+        }]
+    }
     constructor(props) {
         super(props);
         let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => true});
-        var notes = this.getNotesList();
         this.state = {
-            dataSource: ds.cloneWithRows([]),
-            notes
+            dataSource: ds.cloneWithRows([])
         };
         this.pressRow = this.pressRow.bind(this);
         this.getNotesList = this.getNotesList.bind(this);
@@ -24,10 +28,31 @@ export default class Main extends Component {
             console.log("On change!");
             this.sortList(notes);
         };
+        console.log("Main constructor");
+        this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+    }
+
+    onNavigatorEvent(event) {
+        // this is the onPress handler for the two buttons together
+        if (event.type == 'NavBarButtonPress') {
+            // this is the event type for button presses
+            if (event.id == 'create') {
+                // this is the same id field from the static navigatorButtons definition
+                this.props.navigator.push({
+                    screen: 'NoteScreen',
+                    title: "New note",
+                    animated: true, // does the push have transition animation or does it happen immediately (optional)
+                    backButtonHidden: false, // hide the back button altogether (optional)
+                    navigatorStyle: {},
+                });
+            }
+        }
     }
 
     componentWillMount() {
+        console.log("Component will mount")
         Storage.addChangeListener(this.onChange);
+        var notes = this.getNotesList();
     }
 
     componentDidMount() {
@@ -63,14 +88,11 @@ export default class Main extends Component {
     pressRow(noteID) {
         var note = this.state.notes[noteID];//.find((n) => {return n.id == noteID;});[noteID];
         console.log("Row click: ", noteID);
-        const nextRoute = {
-            component: NoteScene,
+        this.props.navigator.push({
+            screen: 'NoteScreen',
             title: note.title ? note.title : 'Note',
             passProps: { note },
-            rightButtonSystemIcon: 'done',
-            onRightButtonPress: () => Keyboard.dismiss(),
-        };
-        this.props.navigator.push(nextRoute);
+        });
     }
 
     render() {
