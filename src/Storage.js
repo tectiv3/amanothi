@@ -1,7 +1,7 @@
 import { AsyncStorage } from 'react-native';
+import rncrypto from 'react-native-rncrypto';
 var assign = require('object-assign');
 var EventEmitter = require('events').EventEmitter;
-
 var _notes = null;
 
 function loadAsyncStore() {

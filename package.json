@@ -13,6 +13,7 @@
     "react-native": "0.41.1",
     "react-native-keyboard-spacer": "^0.3.1",
     "react-native-navigation": "^2.0.0-experimental.209",
+    "react-native-rncrypto": "0.0.2",
     "react-native-zss-rich-text-editor": "git://github.com/wix/react-native-zss-rich-text-editor.git#master",
     "redux": "^3.6.0"
   },
