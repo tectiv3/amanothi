@@ -49,7 +49,6 @@ export default class Editor extends Component {
             }}>
                     <TextInput
                         style={[styles.input, {height:this.state.height}]}
-                        allowFontScaling={true}
                         onChangeText={(text) => {
                             this.setState({text});
                         }}

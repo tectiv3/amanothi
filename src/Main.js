@@ -40,10 +40,7 @@ export default class Main extends Component {
                 // this is the same id field from the static navigatorButtons definition
                 this.props.navigator.push({
                     screen: 'NoteScreen',
-                    title: "New note",
-                    animated: true, // does the push have transition animation or does it happen immediately (optional)
-                    backButtonHidden: false, // hide the back button altogether (optional)
-                    navigatorStyle: {},
+                    title:  "New note"
                 });
             }
         }
