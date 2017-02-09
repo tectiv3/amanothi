@@ -3,6 +3,7 @@ import { View, Text, TouchableHighlight, StyleSheet } from 'react-native';
 import moment from 'moment';
 
 export default class NoteItem extends Component {
+
     constructor(props) {
         super(props);
         this.handlePress = this.handlePress.bind(this);

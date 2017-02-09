@@ -21,7 +21,7 @@ export default class Editor extends Component {
     }
 
     keyboardDidShow (e) {
-        let newSize = Dimensions.get('window').height - e.endCoordinates.height - 80;
+        let newSize = Dimensions.get('window').height - e.endCoordinates.height - 65;
         this.setState({
             height: newSize,
         })
@@ -43,11 +43,10 @@ export default class Editor extends Component {
 
     render() {
         return (
-            <View style={styles.page} onLayout={(ev) => {
+            <ScrollView keyboardDismissMode='interactive' style={styles.page} onLayout={(ev) => {
                 var fullHeight = ev.nativeEvent.layout.height - 60;
                 this.setState({height: fullHeight, fullHeight: fullHeight});
             }}>
-                <ScrollView keyboardDismissMode='interactive'>
                     <TextInput
                         style={[styles.input, {height:this.state.height}]}
                         allowFontScaling={true}
@@ -58,18 +57,13 @@ export default class Editor extends Component {
                         multiline={true}
                         autoFocus={!this.state.text}
                     />
-                </ScrollView>
-            </View>
+            </ScrollView>
         );
     }
 }
 
 var styles = StyleSheet.create({
     page: {
-        flex: 1,
-        alignItems: 'stretch',
-        marginTop: 10,
-        backgroundColor: '#f9f9f7',
     },
     input: {
         padding: 10,

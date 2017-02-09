@@ -1,12 +1,9 @@
-import {
-  Platform
-} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 
 import Main from './Main';
-import Account from './Account';
+// import Account from './Account';
 import Note from './Note';
-import SideMenu from './subviews/SideMenu';
+// import SideMenu from './subviews/SideMenu';
 import Storage from './Storage';
 
 Navigation.registerComponent('MainScreen', () => Main);
