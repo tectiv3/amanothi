@@ -15,12 +15,14 @@ export default class NoteItem extends Component {
 
     render() {
         return (
-            <TouchableHighlight onPress={this.handlePress} >
+            <TouchableHighlight onPress={this.handlePress}>
                 <View style={styles.listItem}>
                     <Text numberOfLines={1} style={styles.titleLabel}>{this.props.note.title ? this.props.note.title : this.props.note.text}</Text>
                     <View style={styles.infoContainer}>
                         <Text style={styles.timeLabel}>{moment((this.props.note.updated)).fromNow()}</Text>
-                        <Text numberOfLines={1} style={styles.previewLabel}>{this.props.note.text ? this.props.note.text.substr(10, 30) : 'No additional content'}</Text>
+                        <Text numberOfLines={1} style={styles.previewLabel}>
+                            {this.props.note.text.split(/\r\n|\n|\r/).slice(1,2).toString() || 'No additional content'}
+                        </Text>
                     </View>
                 </View>
             </TouchableHighlight>

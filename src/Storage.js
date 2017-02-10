@@ -1,5 +1,4 @@
 import { AsyncStorage } from 'react-native';
-import rncrypto from 'react-native-rncrypto';
 var assign = require('object-assign');
 var EventEmitter = require('events').EventEmitter;
 var _notes = null;
@@ -23,7 +22,7 @@ var Storage = assign({}, EventEmitter.prototype, {
 
     getAll: function() {
         if (!_notes) {
-            console.log("Load from storage")
+            console.log("Load from storage");
             loadAsyncStore();//.then(fetchFromServer).then(updateAsyncStore);
             return {};
         } else {

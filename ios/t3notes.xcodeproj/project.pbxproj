@@ -25,7 +25,6 @@
 		5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		9B1785661E4BDF91005762FB /* libReactNativeNavigation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B1785651E4BDF7B005762FB /* libReactNativeNavigation.a */; };
-		9B1785761E4C9817005762FB /* librncrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B1785751E4C96A8005762FB /* librncrypto.a */; };
 		9B1B18711E49136700E09784 /* libReact-Native-Webview-Bridge.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B1B18681E49130100E09784 /* libReact-Native-Webview-Bridge.a */; };
 /* End PBXBuildFile section */
 
@@ -219,13 +218,6 @@
 			remoteGlobalIDString = D8AFADBD1BEE6F3F00A4592D;
 			remoteInfo = ReactNativeNavigation;
 		};
-		9B1785741E4C96A8005762FB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9B1785701E4C96A8005762FB /* rncrypto.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 6A5685E41CCC625D00F95941;
-			remoteInfo = rncrypto;
-		};
 		9B1B18671E49130100E09784 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9B1B18521E49130100E09784 /* React-Native-Webview-Bridge.xcodeproj */;
@@ -259,7 +251,6 @@
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		9B1785461E4BDF7B005762FB /* ReactNativeNavigation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ReactNativeNavigation.xcodeproj; path = "../node_modules/react-native-navigation/ios/ReactNativeNavigation.xcodeproj"; sourceTree = "<group>"; };
-		9B1785701E4C96A8005762FB /* rncrypto.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = rncrypto.xcodeproj; path = "../node_modules/react-native-rncrypto/ios/rncrypto.xcodeproj"; sourceTree = "<group>"; };
 		9B1B18521E49130100E09784 /* React-Native-Webview-Bridge.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "React-Native-Webview-Bridge.xcodeproj"; path = "../node_modules/react-native-webview-bridge-updated/ios/React-Native-Webview-Bridge.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -276,7 +267,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9B1785761E4C9817005762FB /* librncrypto.a in Frameworks */,
 				9B1785661E4BDF91005762FB /* libReactNativeNavigation.a in Frameworks */,
 				9B1B18711E49136700E09784 /* libReact-Native-Webview-Bridge.a in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
@@ -423,7 +413,6 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				9B1785701E4C96A8005762FB /* rncrypto.xcodeproj */,
 				9B1785461E4BDF7B005762FB /* ReactNativeNavigation.xcodeproj */,
 				9B1B18521E49130100E09784 /* React-Native-Webview-Bridge.xcodeproj */,
 				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
@@ -475,14 +464,6 @@
 			isa = PBXGroup;
 			children = (
 				9B1785651E4BDF7B005762FB /* libReactNativeNavigation.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		9B1785711E4C96A8005762FB /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				9B1785751E4C96A8005762FB /* librncrypto.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -616,10 +597,6 @@
 				{
 					ProductGroup = 9B1785471E4BDF7B005762FB /* Products */;
 					ProjectRef = 9B1785461E4BDF7B005762FB /* ReactNativeNavigation.xcodeproj */;
-				},
-				{
-					ProductGroup = 9B1785711E4C96A8005762FB /* Products */;
-					ProjectRef = 9B1785701E4C96A8005762FB /* rncrypto.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -811,13 +788,6 @@
 			fileType = archive.ar;
 			path = libReactNativeNavigation.a;
 			remoteRef = 9B1785641E4BDF7B005762FB /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		9B1785751E4C96A8005762FB /* librncrypto.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = librncrypto.a;
-			remoteRef = 9B1785741E4C96A8005762FB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		9B1B18681E49130100E09784 /* libReact-Native-Webview-Bridge.a */ = {

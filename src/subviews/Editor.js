@@ -10,8 +10,12 @@ export default class Editor extends Component {
     }
 
     componentWillMount () {
-        this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.keyboardDidShow.bind(this))
-        this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this.keyboardDidHide.bind(this))
+        this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.keyboardDidShow.bind(this));
+        this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this.keyboardDidHide.bind(this));
+
+        this.setState({
+            height: Dimensions.get('window').height - 65
+        })
     }
 
     componentWillUnmount () {
@@ -25,14 +29,12 @@ export default class Editor extends Component {
         this.setState({
             height: newSize,
         })
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     }
 
     keyboardDidHide (e) {
         this.setState({
             height: Dimensions.get('window').height
         })
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         this.props.onChange(this.state.text);
     }
 
@@ -43,12 +45,9 @@ export default class Editor extends Component {
 
     render() {
         return (
-            <ScrollView keyboardDismissMode='interactive' style={styles.page} onLayout={(ev) => {
-                var fullHeight = ev.nativeEvent.layout.height - 60;
-                this.setState({height: fullHeight, fullHeight: fullHeight});
-            }}>
+            <ScrollView keyboardDismissMode='interactive' style={styles.page}>
                     <TextInput
-                        style={[styles.input, {height:this.state.height}]}
+                        style={[styles.input, {height: this.state.height}]}
                         onChangeText={(text) => {
                             this.setState({text});
                         }}
@@ -70,9 +69,8 @@ var styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '200',
         fontFamily: 'System',
-        alignItems: 'flex-end',
+        alignItems: 'stretch',
         flexDirection: 'column',
-        justifyContent: 'flex-end',
         backgroundColor: '#f9f9f7',
     },
 });
