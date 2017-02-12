@@ -73,19 +73,15 @@ export default class Main extends Component {
     sortList(notes) {
         console.log('Sorting...')
         //hide deleted here todo:unless in trash bin then the opposite
-        var plain = [];
-        for (var id in notes) {
-            plain.push(notes[id]);
-        }
-        plain.filter(note => !!note);
-        plain.sort(function(a, b) {
+        notes = notes.filter(note => !note.deleted);
+        notes.sort(function(a, b) {
             var dateA = new Date(a.updated), dateB = new Date(b.updated);
             return dateB - dateA;
         });
         this.setState({
-            dataSource: this.state.dataSource.cloneWithRows(plain)
+            dataSource: this.state.dataSource.cloneWithRows(notes)
         });
-        return plain;
+        return notes;
     }
 
     getNotesList() {
@@ -93,9 +89,8 @@ export default class Main extends Component {
         return Storage.getAll();
     }
 
-    pressRow(noteID) {
-        var note = this.state.notes[noteID];//.find((n) => {return n.id == noteID;});[noteID];
-        console.log("Row click: ", noteID);
+    pressRow(id) {
+        var note = this.state.notes.find((n) => n.uuid == id);
         this.props.navigator.push({
             screen: 'NoteScreen',
             title: note.title ? note.title : 'Note',

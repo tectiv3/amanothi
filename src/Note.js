@@ -59,7 +59,7 @@ export default class Note extends Component {
         var note = Object.assign({}, this.state.note);
         note.text = text;
         this.setState({note});
-        if (this.props.note.id) {
+        if (this.props.note.uuid) {
             console.log("Updating note.");
             Storage.updateNote(this.state.note);
         } else {

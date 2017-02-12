@@ -12,7 +12,9 @@ export default class NoteToolbar extends Component {
 
     handleDeletePress() {
         console.log("Delete press", this.props.note);
-        Storage.deleteNote(this.props.note.id);
+        var note = Object.assign({}, this.props.note);
+        note.deleted = new Date().toISOString();
+        Storage.deleteNote(note);
         this.props.navigator.pop();
     }
 
@@ -29,7 +31,7 @@ export default class NoteToolbar extends Component {
             <View style={[styles.toolbarWrapper]}>
                 <View style={styles.columnWrap}>
                     <TouchableOpacity
-                        style={[styles.buttonDefaults]}
+                        style={[styles.toolbarButtonDefaults]}
                         onPress={() => this.handleDeletePress()}
                     >
                         <Image
@@ -38,7 +40,7 @@ export default class NoteToolbar extends Component {
                         />
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={[styles.buttonDefaults]}
+                        style={[styles.toolbarButtonDefaults]}
                         onPress={() => this.handleNewPress()}
                     >
                         <Image

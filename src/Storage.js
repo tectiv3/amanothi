@@ -7,7 +7,7 @@ var _notes = null;
 
 function loadAsyncStore() {
     return AsyncStorage.getItem('notes').then(str => {
-        if (!str) _notes = {};
+        if (!str) _notes = [];
         else _notes = JSON.parse(str);
         Storage.emitChange();
     });
@@ -16,7 +16,7 @@ function loadAsyncStore() {
 function loadAsyncEncrypted() {
     return AsyncStorage.getItem('enotes').then(str => {
         var encrypted = [];
-        _notes = {};
+        _notes = [];
         encrypted = JSON.parse(str);
         var promises = [];
         encrypted.forEach(function (note) {
@@ -25,7 +25,7 @@ function loadAsyncEncrypted() {
         return Promise.all(promises).then(function(results) {
             results.forEach(function(item) {
                 var note = JSON.parse(item.substring(4));
-                _notes[note.id] = note;
+                _notes.push(note);
             });
             Storage.emitChange();
         });
@@ -34,15 +34,8 @@ function loadAsyncEncrypted() {
 
 function updateAsyncStore() {
     if (!_notes) return;
-    var encrypted = [];
-    var promises = [];
-    for (var id in _notes) {
-        promises.push(encryptNote(_notes[id], "Arnold"));
-    }
-    return Promise.all(promises).then(function(results) {
-        results.forEach(function(item) {
-            encrypted.push(item);
-        });
+    var promises = _notes.map((note) => encryptNote(note, "Arnold"));
+    return Promise.all(promises).then(function(encrypted) {
         return AsyncStorage.setItem('enotes', JSON.stringify(encrypted)).catch(err => { console.log("couldn't store note: " + err) });
     }).catch(function(err) {
         console.log("Failed:", err);
@@ -113,7 +106,7 @@ var Storage = assign({}, EventEmitter.prototype, {
         if (!_notes) {
             console.log("Load from storage");
             loadAsyncEncrypted();//.then(fetchFromServer).then(updateAsyncStore);
-            return {};
+            return [];
         } else {
             return _notes;
         }
@@ -122,21 +115,33 @@ var Storage = assign({}, EventEmitter.prototype, {
     createNote: function(note) {
         note.created = new Date().toISOString();
         note.updated = note.created;
-        note.id = Math.floor(Math.random() * 9999) + 1;
-        _notes[note.id] = note;
+        note.uuid    = generateUUID();
+        note.deleted = false;
+        _notes.push(note);
         this.emitChange();
         return updateAsyncStore();
     },
 
     updateNote: function (note) {
-        note.updated = new Date().toISOString();
-        _notes[note.id] = note;
+        for (var i = 0; i < _notes.length; i++) {
+            if (_notes[i].uuid == note.uuid) {
+                note.updated = new Date().toISOString();
+                _notes[i] = note;
+                break;
+            }
+        }
         this.emitChange();
         return updateAsyncStore();
     },
 
-    deleteNote: function (noteID) {
-        delete _notes[noteID];
+    deleteNote: function (note) {
+        for (var i = 0; i < _notes.length; i++) {
+            if (_notes[i].uuid == note.uuid) {
+                _notes[i] = note;
+                break;
+            }
+        }
+        console.log(_notes);
         this.emitChange();
         return updateAsyncStore();
     },

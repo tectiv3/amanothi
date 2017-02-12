@@ -11,7 +11,7 @@ export default class NoteItem extends Component {
     }
 
     handlePress() {
-        return this.props.onPress(this.props.note.id);
+        return this.props.onPress(this.props.note.uuid);
     }
 
     render() {
