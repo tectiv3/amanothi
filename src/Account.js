@@ -1,25 +1,32 @@
 import React, { Component } from 'react';
 import { AppRegistry,
-        NavigatorIOS,
         View,
-        StyleSheet,
         Text,
         TextInput,
         ActivityIndicator,
         TouchableHighlight,
-        AsyncStorage,
         } from 'react-native';
 
-const ACCESS_TOKEN = 'access_token';
-
-import MainScene from './Main';
+import styles from './Styles';
 
 export default class Account extends Component {
+
+    static navigatorStyle = {
+        navBarBackgroundColor: 'rgba(40,53,74,0.8)',
+        navBarTranslucent: true,
+        navBarTextColor: '#75c38d',
+        navBarSubtitleTextColor: '#75c38d',
+        navBarButtonColor: '#75c38d',
+        statusBarTextColorSchemeSingleScreen: 'light',
+        navBarNoBorder: true,
+        drawUnderNavBar: false,
+    }
+
     static navigatorButtons = {
-      leftButtons: [{
-        title: 'Close',
-        id: 'close'
-      }]
+        leftButtons: [{
+            title: 'Close',
+            id: 'close'
+        }]
     };
 
     constructor(props) {
@@ -37,18 +44,6 @@ export default class Account extends Component {
         if (event.id == 'close') {
             this.props.navigator.dismissModal();
         }
-    }
-
-    storeToken(responseData){
-        AsyncStorage.setItem(ACCESS_TOKEN, responseData, (err)=> {
-            if(err){
-                console.log("an error");
-                throw err;
-            }
-            console.log("success");
-        }).catch((err)=> {
-            console.log("error is: " + err);
-        });
     }
 
     async onLoginPressed() {
@@ -73,7 +68,7 @@ export default class Account extends Component {
     //       let accessToken = res;
     //       console.log(accessToken);
     //       //On success we will store the access_token in the AsyncStorage
-          this.storeToken("{valid: true}");
+        //   this.storeToken("{valid: true}");
           this.props.navigator.dismissModal();
         //   this.props.navigator.popToRoot();
     //   } else {
@@ -89,72 +84,27 @@ export default class Account extends Component {
     }
 
     render() {
-
         return (
-            <View style={styles.container}>
-                <Text style={styles.labelText}>
+            <View style={styles.accountContainer}>
+                <Text style={styles.accountLabelText}>
                     Encryption password
                 </Text>
                 <TextInput
                     onChangeText={ (text)=> this.setState({password: text}) }
-                    style={styles.input}
-                    placeholder="Password">
+                    style={styles.accountInput}
+                    placeholder="Password"
+                    value="Arnold">
                 </TextInput>
-                <TouchableHighlight onPress={this.onLoginPressed.bind(this)} style={styles.button}>
-                    <Text style={styles.buttonText}>
-                        Login
+                <TouchableHighlight onPress={this.onLoginPressed.bind(this)} style={styles.accountButton}>
+                    <Text style={styles.accountButtonText}>
+                        Save
                     </Text>
                 </TouchableHighlight>
-                <Text style={styles.error}>
+                <Text style={styles.accountError}>
                     {this.state.error}
                 </Text>
-                <ActivityIndicator animating={this.state.showProgress} size="large" style={styles.loader} />
+                <ActivityIndicator animating={this.state.showProgress} size="large" style={styles.accountLoader} />
             </View>
         );
     }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-    padding: 10,
-    paddingTop: 80
-  },
-  input: {
-    height: 50,
-    marginTop: 10,
-    padding: 4,
-    fontSize: 18,
-    borderWidth: 1,
-    borderColor: '#75c38d'
-  },
-  button: {
-    height: 50,
-    backgroundColor: '#75c38d',
-    alignSelf: 'stretch',
-    marginTop: 10,
-    justifyContent: 'center'
-  },
-  buttonText: {
-    fontSize: 22,
-    color: '#FFF',
-    alignSelf: 'center'
-  },
-  heading: {
-    fontSize: 30,
-  },
-  error: {
-    color: 'red',
-    paddingTop: 10
-  },
-  success: {
-    color: 'green',
-    paddingTop: 10
-  },
-  loader: {
-    marginTop: 20
-  }
-});

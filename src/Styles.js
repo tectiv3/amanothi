@@ -82,7 +82,47 @@ export default styles = StyleSheet.create({
         height: 25,
         tintColor: '#75c38d',
     },
-    buttonDefaults: {
+    toolbarButtonDefaults: {
         paddingHorizontal: 15,
+    },
+    accountContainer: {
+        flex: 1,
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        backgroundColor: '#28354a',
+        padding: 10,
+        paddingTop: 80
+    },
+    accountInput: {
+        height: 50,
+        marginTop: 10,
+        padding: 4,
+        fontSize: 18,
+        borderWidth: 1,
+        borderColor: '#75c38d',
+        color: 'white'
+    },
+    accountButton: {
+        height: 50,
+        backgroundColor: '#75c38d',
+        alignSelf: 'stretch',
+        marginTop: 10,
+        justifyContent: 'center'
+    },
+    accountButtonText: {
+        fontSize: 22,
+        color: '#FFF',
+        alignSelf: 'center'
+    },
+    accountError: {
+        color: 'red',
+        paddingTop: 10
+    },
+    accountLoader: {
+        marginTop: 20
+    },
+    accountLabelText: {
+        color: 'white',
+        fontSize: 18
     },
 });

@@ -8,16 +8,18 @@ import Storage from './Storage';
 import styles from './Styles';
 
 export default class Main extends Component {
+
     static navigatorButtons = {
         rightButtons: [{
             icon: require('../img/navicon_new.png'),
             id: 'create'
         }],
         leftButtons: [{
-            title: "Account",
+            icon: require('../img/navicon_password.png'),
             id: 'account'
         }]
     }
+
     constructor(props) {
         super(props);
         let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => true});
@@ -33,7 +35,6 @@ export default class Main extends Component {
             console.log("On change!");
             this.sortList(notes);
         };
-        console.log("Main constructor");
         this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     }
 
@@ -49,7 +50,7 @@ export default class Main extends Component {
                 });
             } else if (event.id == 'account') {
                 this.props.navigator.showModal({
-                  screen: "AccountScreen"
+                    screen: "AccountScreen",
                 });
             }
         }
