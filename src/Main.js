@@ -1,16 +1,21 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Text, ListView, TouchableHighlight, StyleSheet, Keyboard } from 'react-native';
+import { View, Text, ListView, TouchableHighlight, Keyboard } from 'react-native';
 
 import Header from './subviews/Header';
 import NoteItem from './subviews/NoteItem';
 import NoteScene from './Note';
 import Storage from './Storage';
+import styles from './Styles';
 
 export default class Main extends Component {
     static navigatorButtons = {
         rightButtons: [{
-            icon: require('../img/navicon_edit.png'),
+            icon: require('../img/navicon_new.png'),
             id: 'create'
+        }],
+        leftButtons: [{
+            title: "Account",
+            id: 'account'
         }]
     }
     constructor(props) {
@@ -41,6 +46,10 @@ export default class Main extends Component {
                 this.props.navigator.push({
                     screen: 'NoteScreen',
                     title:  "New note"
+                });
+            } else if (event.id == 'account') {
+                this.props.navigator.showModal({
+                  screen: "AccountScreen"
                 });
             }
         }
@@ -107,12 +116,3 @@ export default class Main extends Component {
         );
     }
 }
-
-var styles = StyleSheet.create({
-    page: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'stretch',
-        backgroundColor: '#f9f9f7'
-    }
-});

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { View, Text, TouchableHighlight, StyleSheet } from 'react-native';
 import moment from 'moment';
+import styles from '../Styles';
 
 export default class NoteItem extends Component {
 
@@ -34,39 +35,3 @@ NoteItem.propTypes = {
     note:    React.PropTypes.object.isRequired,
     onPress: React.PropTypes.func
 }
-
-var styles = StyleSheet.create({
-    listItem: {
-      backgroundColor: '#f9f9f7',
-      borderBottomWidth: 0.5,
-      borderColor: '#D0DBE4',
-      padding: 10,
-      paddingRight: 20,
-      paddingLeft: 25,
-      height: 61
-    },
-    titleLabel: {
-      fontSize: 16,
-      fontWeight: '400',
-      fontFamily: 'System',
-      color: '#232527',
-    },
-    infoContainer: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-        marginTop: 3
-    },
-    timeLabel: {
-      fontSize: 15,
-      fontWeight: '400',
-      color: 'rgba(0,0,0,0.6)',
-    },
-    previewLabel: {
-      fontSize: 15,
-      paddingRight: 50,
-      fontWeight: '400',
-      color: 'rgba(0,0,0,0.5)',
-      marginLeft: 10
-    },
-});

@@ -7,6 +7,8 @@ import NoteToolbar from './subviews/NoteToolbar';
 
 import Storage from './Storage';
 
+import styles from './Styles';
+
 export default class Note extends Component {
 
     static navigatorButtons = {
@@ -83,10 +85,3 @@ export default class Note extends Component {
 Note.propTypes = {
     note:    React.PropTypes.object
 }
-
-var styles = StyleSheet.create({
-    page: {
-        flex: 1,
-        backgroundColor: 'rgba(249,249,247,1)',
-    },
-});

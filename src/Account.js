@@ -92,15 +92,13 @@ export default class Account extends Component {
 
         return (
             <View style={styles.container}>
-                <TextInput
-                    onChangeText={ (text)=> this.setState({email: text}) }
-                    style={styles.input} placeholder="Email">
-                </TextInput>
+                <Text style={styles.labelText}>
+                    Encryption password
+                </Text>
                 <TextInput
                     onChangeText={ (text)=> this.setState({password: text}) }
                     style={styles.input}
-                    placeholder="Password"
-                    secureTextEntry={true}>
+                    placeholder="Password">
                 </TextInput>
                 <TouchableHighlight onPress={this.onLoginPressed.bind(this)} style={styles.button}>
                     <Text style={styles.buttonText}>

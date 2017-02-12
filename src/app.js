@@ -1,14 +1,14 @@
 import {Navigation} from 'react-native-navigation';
 
 import Main from './Main';
-// import Account from './Account';
+import Account from './Account';
 import Note from './Note';
 // import SideMenu from './subviews/SideMenu';
 import Storage from './Storage';
 
 Navigation.registerComponent('MainScreen', () => Main);
 Navigation.registerComponent('NoteScreen', () => Note);
-// Navigation.registerComponent('AccountScreen', () => Account);
+Navigation.registerComponent('AccountScreen', () => Account);
 // Navigation.registerComponent('SideMenu', () => SideMenu);
 Navigation.startSingleScreenApp({
     screen: {

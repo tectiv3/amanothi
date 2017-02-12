@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { AppRegistry, TextInput, View, ScrollView, StyleSheet, DeviceEventEmitter, LayoutAnimation, Dimensions, Keyboard } from 'react-native';
 
+import styles from '../Styles';
+
 export default class Editor extends Component {
 
     constructor(props) {
@@ -59,18 +61,3 @@ export default class Editor extends Component {
         );
     }
 }
-
-var styles = StyleSheet.create({
-    page: {
-    },
-    input: {
-        padding: 10,
-        paddingTop: 0,
-        fontSize: 18,
-        fontWeight: '200',
-        fontFamily: 'System',
-        alignItems: 'stretch',
-        flexDirection: 'column',
-        backgroundColor: '#f9f9f7',
-    },
-});

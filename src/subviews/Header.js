@@ -1,32 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput } from 'react-native';
+import { View, TextInput } from 'react-native';
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#28354a',
-  },
-  input: {
-    height: 30,
-    flex: 1,
-    paddingHorizontal: 8,
-    fontSize: 15,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 2,
-  },
-});
+import styles from '../Styles';
 
-const Header = (props) => (
-    <View style = {styles.container}>
+export default Header = (props) => (
+    <View style = {styles.headerContainer}>
         <TextInput
-            style = {styles.input}
+            style = {styles.searchInput}
             placeholder = "Search"
             onChangeText = {(text) => console.log('searching for ', text)}
         />
     </View>
 );
-
-export default Header;
