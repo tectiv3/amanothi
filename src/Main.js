@@ -62,6 +62,7 @@ export default class Main extends Component {
 
     sortList(notes) {
         console.log('Sorting...')
+        //hide deleted here todo:unless in trash bin then the opposite
         var plain = [];
         for (var id in notes) {
             plain.push(notes[id]);
