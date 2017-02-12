@@ -64,17 +64,19 @@ function generateUUID() {
 }
 
 async function decryptItem(cipher, key) {
+    var result = null;
     try {
-        return await Aes.decrypt(cipher, key);
+        result = await Aes.decrypt(cipher, key);
     } catch (e) {
+        //doesn't catch reject
         console.error(e);
-        return false;
     }
+    return result;
 }
 
 function decryptNote(note, key) {
     return new Promise(function(resolve, reject) {
-        decryptItem(note.key, key).then((note_key) => decryptItem(note.content, note_key).then((result) => resolve(result)))
+        Aes.decrypt(note.key, key).then((note_key) => Aes.decrypt(note.content, note_key).then((result) =>  resolve(result)).catch((err) => console.log("Decrypt error:", err))).catch((err)  => console.log("Decrypt error:", err));
     });
 }
 
