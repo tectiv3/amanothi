@@ -4,6 +4,16 @@ var EventEmitter = require('events').EventEmitter;
 var Aes = NativeModules.Aes;
 
 var _notes = null;
+var _account = null;
+
+loadAsyncAccount();
+
+function loadAsyncAccount() {
+    return AsyncStorage.getItem('account').then(str => {
+        if (!str) _account = {};
+        else _account = JSON.parse(str);
+    });
+}
 
 function loadAsyncStore() {
     return AsyncStorage.getItem('notes').then(str => {
@@ -19,8 +29,9 @@ function loadAsyncEncrypted() {
         _notes = [];
         encrypted = JSON.parse(str);
         var promises = [];
+        account = Storage.getAccount();
         encrypted.forEach(function (note) {
-            promises.push(decryptNote(note, "Arnold"));
+            promises.push(decryptNote(note, account.password));
         });
         return Promise.all(promises).then(function(results) {
             results.forEach(function(item) {
@@ -32,9 +43,10 @@ function loadAsyncEncrypted() {
     });
 }
 
-function updateAsyncStore() {
+function updateAsyncStore(password) {
+    var password = password ? password : _account.password;
     if (!_notes) return;
-    var promises = _notes.map((note) => encryptNote(note, "Arnold"));
+    var promises = _notes.map((note) => encryptNote(note, password));
     return Promise.all(promises).then(function(encrypted) {
         return AsyncStorage.setItem('enotes', JSON.stringify(encrypted)).catch(err => { console.log("couldn't store note: " + err) });
     }).catch(function(err) {
@@ -77,13 +89,9 @@ async function encryptNote(note, key) {
     if (!note.uuid) {
         note.uuid = generateUUID();
     }
-    var note_key = '';
-    if (note.key) {
-        note_key = await Aes.decrypt(note.key, key);
-    } else {
-        note_key = generateRandomKey();
-        note.key = await Aes.encrypt(note_key, key);
-    }
+    var note_key = generateRandomKey();
+    note.key = await Aes.encrypt(note_key, key);
+
     var p = new Promise(function(resolve, reject) {
         Aes.encrypt("e001" + JSON.stringify(note), note_key).then(cipher => {
             var copy = {};
@@ -110,6 +118,17 @@ var Storage = assign({}, EventEmitter.prototype, {
         } else {
             return _notes;
         }
+    },
+
+    getAccount: function() {
+        return _account;
+    },
+
+    saveAccount: function(data) {
+        //on password change expire all other devices sessions
+        _account = data;
+        AsyncStorage.setItem('account', JSON.stringify(_account)).catch(err => { console.log("couldn't store account: " + err) });
+        return updateAsyncStore(data.password);
     },
 
     createNote: function(note) {
@@ -141,7 +160,6 @@ var Storage = assign({}, EventEmitter.prototype, {
                 break;
             }
         }
-        console.log(_notes);
         this.emitChange();
         return updateAsyncStore();
     },

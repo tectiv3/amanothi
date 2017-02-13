@@ -6,7 +6,7 @@ import { AppRegistry,
         ActivityIndicator,
         TouchableHighlight,
         } from 'react-native';
-
+import Storage from './Storage';
 import styles from './Styles';
 
 export default class Account extends Component {
@@ -31,9 +31,10 @@ export default class Account extends Component {
 
     constructor(props) {
         super(props);
+        var account = Storage.getAccount();
         this.state = {
-            email: "",
-            password: "",
+            email: account.password,
+            password: account.password,
             error: "",
             showProgress: false,
         }
@@ -49,6 +50,7 @@ export default class Account extends Component {
     async onLoginPressed() {
         this.setState({showProgress: true})
         try {
+            Storage.saveAccount({password: this.state.password, email: this.state.email});
     //   let response = await fetch('/api/login', {
     //                           method: 'POST',
     //                           headers: {
@@ -69,7 +71,8 @@ export default class Account extends Component {
     //       console.log(accessToken);
     //       //On success we will store the access_token in the AsyncStorage
         //   this.storeToken("{valid: true}");
-          this.props.navigator.dismissModal();
+            this.setState({showProgress: false});
+            this.props.navigator.dismissModal();
         //   this.props.navigator.popToRoot();
     //   } else {
     //       //Handle error
@@ -93,7 +96,7 @@ export default class Account extends Component {
                     onChangeText={ (text)=> this.setState({password: text}) }
                     style={styles.accountInput}
                     placeholder="Password"
-                    value="Arnold">
+                    value={this.state.password}>
                 </TextInput>
                 <TouchableHighlight onPress={this.onLoginPressed.bind(this)} style={styles.accountButton}>
                     <Text style={styles.accountButtonText}>
