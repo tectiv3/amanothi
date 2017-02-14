@@ -26,6 +26,16 @@
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		9B1785661E4BDF91005762FB /* libReactNativeNavigation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B1785651E4BDF7B005762FB /* libReactNativeNavigation.a */; };
 		9B1B18711E49136700E09784 /* libReact-Native-Webview-Bridge.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B1B18681E49130100E09784 /* libReact-Native-Webview-Bridge.a */; };
+		9BA4C12E1E5134A70079E36D /* libTouchID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BA4C12D1E51347E0079E36D /* libTouchID.a */; };
+		9BA4C1501E5159590079E36D /* apple-touch-icon-114x114.png in Resources */ = {isa = PBXBuildFile; fileRef = 9BA4C1471E5159590079E36D /* apple-touch-icon-114x114.png */; };
+		9BA4C1511E5159590079E36D /* apple-touch-icon-120x120.png in Resources */ = {isa = PBXBuildFile; fileRef = 9BA4C1481E5159590079E36D /* apple-touch-icon-120x120.png */; };
+		9BA4C1521E5159590079E36D /* apple-touch-icon-144x144.png in Resources */ = {isa = PBXBuildFile; fileRef = 9BA4C1491E5159590079E36D /* apple-touch-icon-144x144.png */; };
+		9BA4C1531E5159590079E36D /* apple-touch-icon-152x152.png in Resources */ = {isa = PBXBuildFile; fileRef = 9BA4C14A1E5159590079E36D /* apple-touch-icon-152x152.png */; };
+		9BA4C1541E5159590079E36D /* apple-touch-icon-180x180.png in Resources */ = {isa = PBXBuildFile; fileRef = 9BA4C14B1E5159590079E36D /* apple-touch-icon-180x180.png */; };
+		9BA4C1551E5159590079E36D /* apple-touch-icon-57x57.png in Resources */ = {isa = PBXBuildFile; fileRef = 9BA4C14C1E5159590079E36D /* apple-touch-icon-57x57.png */; };
+		9BA4C1561E5159590079E36D /* apple-touch-icon-60x60.png in Resources */ = {isa = PBXBuildFile; fileRef = 9BA4C14D1E5159590079E36D /* apple-touch-icon-60x60.png */; };
+		9BA4C1571E5159590079E36D /* apple-touch-icon-72x72.png in Resources */ = {isa = PBXBuildFile; fileRef = 9BA4C14E1E5159590079E36D /* apple-touch-icon-72x72.png */; };
+		9BA4C1581E5159590079E36D /* apple-touch-icon-76x76.png in Resources */ = {isa = PBXBuildFile; fileRef = 9BA4C14F1E5159590079E36D /* apple-touch-icon-76x76.png */; };
 		9BE20B831E4E360500696172 /* libRCTAes.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BE20B821E4E355B00696172 /* libRCTAes.a */; };
 /* End PBXBuildFile section */
 
@@ -226,6 +236,13 @@
 			remoteGlobalIDString = 4114DC4C1C187C3A003CD988;
 			remoteInfo = "React-Native-Webview-Bridge";
 		};
+		9BA4C12C1E51347E0079E36D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BA4C10C1E51347D0079E36D /* TouchID.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = TouchID;
+		};
 		9BE20B811E4E355B00696172 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9BE20B5C1E4E1DEF00696172 /* RCTAes.xcodeproj */;
@@ -260,6 +277,16 @@
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		9B1785461E4BDF7B005762FB /* ReactNativeNavigation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ReactNativeNavigation.xcodeproj; path = "../node_modules/react-native-navigation/ios/ReactNativeNavigation.xcodeproj"; sourceTree = "<group>"; };
 		9B1B18521E49130100E09784 /* React-Native-Webview-Bridge.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "React-Native-Webview-Bridge.xcodeproj"; path = "../node_modules/react-native-webview-bridge-updated/ios/React-Native-Webview-Bridge.xcodeproj"; sourceTree = "<group>"; };
+		9BA4C10C1E51347D0079E36D /* TouchID.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TouchID.xcodeproj; path = "../node_modules/react-native-touch-id/TouchID.xcodeproj"; sourceTree = "<group>"; };
+		9BA4C1471E5159590079E36D /* apple-touch-icon-114x114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "apple-touch-icon-114x114.png"; sourceTree = "<group>"; };
+		9BA4C1481E5159590079E36D /* apple-touch-icon-120x120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "apple-touch-icon-120x120.png"; sourceTree = "<group>"; };
+		9BA4C1491E5159590079E36D /* apple-touch-icon-144x144.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "apple-touch-icon-144x144.png"; sourceTree = "<group>"; };
+		9BA4C14A1E5159590079E36D /* apple-touch-icon-152x152.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "apple-touch-icon-152x152.png"; sourceTree = "<group>"; };
+		9BA4C14B1E5159590079E36D /* apple-touch-icon-180x180.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "apple-touch-icon-180x180.png"; sourceTree = "<group>"; };
+		9BA4C14C1E5159590079E36D /* apple-touch-icon-57x57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "apple-touch-icon-57x57.png"; sourceTree = "<group>"; };
+		9BA4C14D1E5159590079E36D /* apple-touch-icon-60x60.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "apple-touch-icon-60x60.png"; sourceTree = "<group>"; };
+		9BA4C14E1E5159590079E36D /* apple-touch-icon-72x72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "apple-touch-icon-72x72.png"; sourceTree = "<group>"; };
+		9BA4C14F1E5159590079E36D /* apple-touch-icon-76x76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "apple-touch-icon-76x76.png"; sourceTree = "<group>"; };
 		9BE20B5C1E4E1DEF00696172 /* RCTAes.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAes.xcodeproj; path = "../node_modules/react-native-aes-crypto/ios/RCTAes.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -276,6 +303,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9BA4C12E1E5134A70079E36D /* libTouchID.a in Frameworks */,
 				9BE20B831E4E360500696172 /* libRCTAes.a in Frameworks */,
 				9B1785661E4BDF91005762FB /* libReactNativeNavigation.a in Frameworks */,
 				9B1B18711E49136700E09784 /* libReact-Native-Webview-Bridge.a in Frameworks */,
@@ -376,6 +404,7 @@
 		13B07FAE1A68108700A75B9A /* t3notes */ = {
 			isa = PBXGroup;
 			children = (
+				9BA4C1461E5159590079E36D /* icon */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
@@ -423,6 +452,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				9BA4C10C1E51347D0079E36D /* TouchID.xcodeproj */,
 				9BE20B5C1E4E1DEF00696172 /* RCTAes.xcodeproj */,
 				9B1785461E4BDF7B005762FB /* ReactNativeNavigation.xcodeproj */,
 				9B1B18521E49130100E09784 /* React-Native-Webview-Bridge.xcodeproj */,
@@ -485,6 +515,31 @@
 				9B1B18681E49130100E09784 /* libReact-Native-Webview-Bridge.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		9BA4C10D1E51347D0079E36D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9BA4C12D1E51347E0079E36D /* libTouchID.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9BA4C1461E5159590079E36D /* icon */ = {
+			isa = PBXGroup;
+			children = (
+				9BA4C1471E5159590079E36D /* apple-touch-icon-114x114.png */,
+				9BA4C1481E5159590079E36D /* apple-touch-icon-120x120.png */,
+				9BA4C1491E5159590079E36D /* apple-touch-icon-144x144.png */,
+				9BA4C14A1E5159590079E36D /* apple-touch-icon-152x152.png */,
+				9BA4C14B1E5159590079E36D /* apple-touch-icon-180x180.png */,
+				9BA4C14C1E5159590079E36D /* apple-touch-icon-57x57.png */,
+				9BA4C14D1E5159590079E36D /* apple-touch-icon-60x60.png */,
+				9BA4C14E1E5159590079E36D /* apple-touch-icon-72x72.png */,
+				9BA4C14F1E5159590079E36D /* apple-touch-icon-76x76.png */,
+			);
+			name = icon;
+			path = ../icon;
 			sourceTree = "<group>";
 		};
 		9BE20B7E1E4E355B00696172 /* Products */ = {
@@ -620,6 +675,10 @@
 				{
 					ProductGroup = 9B1785471E4BDF7B005762FB /* Products */;
 					ProjectRef = 9B1785461E4BDF7B005762FB /* ReactNativeNavigation.xcodeproj */;
+				},
+				{
+					ProductGroup = 9BA4C10D1E51347D0079E36D /* Products */;
+					ProjectRef = 9BA4C10C1E51347D0079E36D /* TouchID.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -820,6 +879,13 @@
 			remoteRef = 9B1B18671E49130100E09784 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		9BA4C12D1E51347E0079E36D /* libTouchID.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libTouchID.a;
+			remoteRef = 9BA4C12C1E51347E0079E36D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		9BE20B821E4E355B00696172 /* libRCTAes.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -841,8 +907,17 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9BA4C1581E5159590079E36D /* apple-touch-icon-76x76.png in Resources */,
+				9BA4C1531E5159590079E36D /* apple-touch-icon-152x152.png in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				9BA4C1571E5159590079E36D /* apple-touch-icon-72x72.png in Resources */,
+				9BA4C1551E5159590079E36D /* apple-touch-icon-57x57.png in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
+				9BA4C1541E5159590079E36D /* apple-touch-icon-180x180.png in Resources */,
+				9BA4C1561E5159590079E36D /* apple-touch-icon-60x60.png in Resources */,
+				9BA4C1511E5159590079E36D /* apple-touch-icon-120x120.png in Resources */,
+				9BA4C1501E5159590079E36D /* apple-touch-icon-114x114.png in Resources */,
+				9BA4C1521E5159590079E36D /* apple-touch-icon-144x144.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -962,7 +1037,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = org.tectiv3.t3notes;
 				PRODUCT_NAME = t3notes;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -982,7 +1057,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = org.tectiv3.t3notes;
 				PRODUCT_NAME = t3notes;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -1026,7 +1101,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/../node_modules/react-native-navigation/ios";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../node_modules/**";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1065,7 +1140,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/../node_modules/react-native-navigation/ios";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../node_modules/**";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
