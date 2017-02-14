@@ -1,6 +1,9 @@
 import React, { Component, PropTypes } from 'react';
 import { View, Text, ListView, TouchableHighlight, Keyboard } from 'react-native';
 
+import { NativeModules } from 'react-native';
+const NativeTouchID = NativeModules.TouchID;
+
 import Header from './subviews/Header';
 import NoteItem from './subviews/NoteItem';
 import NoteScene from './Note';
@@ -30,12 +33,11 @@ export default class Main extends Component {
         this.getNotesList = this.getNotesList.bind(this);
         this.sortList = this.sortList.bind(this);
         this.onChange = () => {
-            var notes = this.getNotesList();
+            var notes = this.getNotesList('on change event');
             this.setState({notes});
             console.log("On change!");
             this.sortList(notes);
         };
-        this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     }
 
     onNavigatorEvent(event) {
@@ -59,7 +61,33 @@ export default class Main extends Component {
     componentWillMount() {
         console.log("Component will mount")
         Storage.addChangeListener(this.onChange);
-        var notes = this.getNotesList();
+        new Promise((resolve, reject) => {
+            NativeTouchID.isSupported(error => {
+                if (error) {
+                    return reject(error.message);
+                }
+                resolve(true);
+            });
+        }).then( () => {
+            new Promise( (resolve, reject) => {
+                NativeTouchID.authenticate("Unlock", error => {
+                    if (error) {
+                        return reject(error.message);
+                    }
+                    resolve(true);
+                });
+            }).then(() => {
+                console.log("OK");
+                this.getNotesList("touch id ok");
+                this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+            }).catch((result) => {
+                console.log(result);
+                // this.props.navigator.showModal({screen: "AccountScreen"});
+            });
+        }).catch((result) => {
+            this.getNotesList("no touch id");
+            this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+        });
     }
 
     componentDidMount() {
@@ -84,8 +112,8 @@ export default class Main extends Component {
         return notes;
     }
 
-    getNotesList() {
-        console.log('Load from storage.');
+    getNotesList(caller) {
+        console.log('Load from storage.', caller);
         return Storage.getAll();
     }
 

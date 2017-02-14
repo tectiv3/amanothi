@@ -30,6 +30,8 @@ function loadAsyncEncrypted() {
         encrypted = JSON.parse(str);
         var promises = [];
         account = Storage.getAccount();
+        console.log(account);
+        if (!encrypted) return [];
         encrypted.forEach(function (note) {
             promises.push(decryptNote(note, account.password));
         });
@@ -39,12 +41,12 @@ function loadAsyncEncrypted() {
                 _notes.push(note);
             });
             Storage.emitChange();
-        });
+        }).catch(error => console.log(error));
     });
 }
 
-function updateAsyncStore(password) {
-    var password = password ? password : _account.password;
+function updateAsyncStore() {
+    var password = _account.password;
     if (!_notes) return;
     var promises = _notes.map((note) => encryptNote(note, password));
     return Promise.all(promises).then(function(encrypted) {
@@ -81,7 +83,18 @@ async function decryptItem(cipher, key) {
 
 function decryptNote(note, key) {
     return new Promise(function(resolve, reject) {
-        Aes.decrypt(note.key, key).then((note_key) => Aes.decrypt(note.content, note_key).then((result) =>  resolve(result)).catch((err) => console.log("Decrypt error:", err))).catch((err)  => console.log("Decrypt error:", err));
+        Aes.decrypt(note.key, key).then(async (note_key) => {
+            try {
+                let hash = await Aes.hmac(note.content, note_key);
+                if (hash !== note.hash) {
+                    console.log("Hmac doesn't match.")
+                    reject("Hmac doesn't match");
+                }
+                await Aes.decrypt(note.content, note_key).then((result) =>  resolve(result)).catch((err) => console.log("Decrypt error:", err));
+            } catch (e) {
+                reject("Hash error");
+            }
+        }).catch((err)  => console.log("Decrypt error:", err));
     });
 }
 
@@ -126,9 +139,18 @@ var Storage = assign({}, EventEmitter.prototype, {
 
     saveAccount: function(data) {
         //on password change expire all other devices sessions
-        _account = data;
-        AsyncStorage.setItem('account', JSON.stringify(_account)).catch(err => { console.log("couldn't store account: " + err) });
-        return updateAsyncStore(data.password);
+        // data.email = data.email || 'change this';
+        return Aes.sha256(data.password).then((hash) => {
+            data.password = hash;
+            _account = data;
+            console.log('pw hash:', hash, _account);
+        }).then(() => {
+            console.log('saving account');
+            AsyncStorage.setItem('account', JSON.stringify(_account));
+        }).then(() => {
+            console.log('Re-encrypting notes');
+            updateAsyncStore(data.password);
+        }).catch(err => { console.log("couldn't store account: " + err) });
     },
 
     createNote: function(note) {

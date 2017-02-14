@@ -9,18 +9,17 @@
   "dependencies": {
     "events": "^1.1.1",
     "moment": "^2.17.1",
-    "react": "15.4.2",
-    "react-native": "0.41.1",
+    "react": "^15.4.2",
+    "react-native": "^0.41.1",
     "react-native-aes-crypto": "^1.0.2",
     "react-native-keyboard-spacer": "^0.3.1",
-    "react-native-navigation": "^2.0.0-experimental.209",
-    "react-native-zss-rich-text-editor": "git://github.com/wix/react-native-zss-rich-text-editor.git#master",
+    "react-native-navigation": "git@github.com:tectiv3/react-native-navigation.git#master",
+    "react-native-touch-id": "^3.0.0",
     "redux": "^3.6.0"
   },
   "devDependencies": {
     "babel-jest": "18.0.0",
     "babel-preset-react-native": "1.9.1",
-    "flow-bin": "^0.38.0",
     "jest": "18.1.0",
     "react-test-renderer": "15.4.2"
   },
