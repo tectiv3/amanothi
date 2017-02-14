@@ -55,9 +55,9 @@ export default class Note extends Component {
     }
 
     onChange(text) {
-        if (this.state.note.text == text) return;
+        if (this.state.note.text == text.trim()) return;
         var note = Object.assign({}, this.state.note);
-        note.text = text;
+        note.text = text.trim();
         this.setState({note});
         if (this.props.note.uuid) {
             console.log("Updating note.");

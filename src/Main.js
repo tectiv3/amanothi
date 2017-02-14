@@ -30,6 +30,7 @@ export default class Main extends Component {
             dataSource: ds.cloneWithRows([])
         };
         this.pressRow = this.pressRow.bind(this);
+        this.handleSearchChange = this.handleSearchChange.bind(this);
         this.getNotesList = this.getNotesList.bind(this);
         this.sortList = this.sortList.bind(this);
         this.onChange = () => {
@@ -126,13 +127,36 @@ export default class Main extends Component {
         });
     }
 
+    handleSearchChange(text) {
+        console.log("Searching...")
+        var search = text.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
+        if (search == '') {
+            notes = this.state.notes;
+        } else {
+            notes = this.state.notes.filter((note) => {
+                if (note.deleted) return false;
+                var regex = new RegExp(search, "gi");
+                return regex.test(note.text);
+            });
+            console.log(notes);
+            notes.sort(function(a, b) {
+                var dateA = new Date(a.updated), dateB = new Date(b.updated);
+                return dateB - dateA;
+            });
+        }
+        this.setState({
+            dataSource: this.state.dataSource.cloneWithRows(notes)
+        });
+
+    }
+
     render() {
         return(
             <View style={styles.page}>
                 <ListView
                     ref="list"
                     dataSource={this.state.dataSource}
-                    renderHeader={() => <Header />}
+                    renderHeader={() => <Header onChange={this.handleSearchChange} />}
                     renderRow={ (rowData, sectionID, rowID) => <NoteItem onPress={this.pressRow} note={rowData} /> }
                     enableEmptySections={true}
                 />

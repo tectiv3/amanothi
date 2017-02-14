@@ -8,7 +8,7 @@ export default Header = (props) => (
         <TextInput
             style = {styles.searchInput}
             placeholder = "Search"
-            onChangeText = {(text) => console.log('searching for ', text)}
+            onChangeText = {(text) => props.onChange(text)}
         />
     </View>
 );
