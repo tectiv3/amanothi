@@ -1,3 +1,4 @@
+import YANavigator from 'react-native-ya-navigator';
 import React, { Component } from 'react';
 import { AppRegistry,
         View,
@@ -5,6 +6,10 @@ import { AppRegistry,
         TextInput,
         ActivityIndicator,
         TouchableHighlight,
+        TouchableOpacity,
+        Navigator,
+        StatusBar,
+        Platform,
         Switch,
         } from 'react-native';
 import Storage from './Storage';
@@ -30,6 +35,13 @@ export default class Account extends Component {
         }]
     };
 
+    static navigationDelegate = {
+        id: 'account',
+        navBarIsHidden: true,
+        backBtnText: 'Close',
+        sceneConfig: Platform.OS === 'ios' && Navigator.SceneConfigs.FloatFromBottom,
+    }
+
     constructor(props) {
         super(props);
         var account = Storage.getAccount();
@@ -40,7 +52,6 @@ export default class Account extends Component {
             showProgress: false,
             TouchID_enabled: account.settings && account.settings.TouchID_enabled
         }
-        this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
         this.handleSwitchTouchid = this.handleSwitchTouchid.bind(this);
     }
 
@@ -75,7 +86,7 @@ export default class Account extends Component {
     //       //On success we will store the access_token in the AsyncStorage
         //   this.storeToken("{valid: true}");
             this.setState({showProgress: false});
-            this.props.navigator.dismissModal();
+            this.props.navigator.pop();
         //   this.props.navigator.popToRoot();
     //   } else {
     //       //Handle error
@@ -97,7 +108,14 @@ export default class Account extends Component {
 
     render() {
         return (
-            <View style={styles.accountContainer}>
+            <YANavigator.Scene
+                paddingTop={false}
+                delegate={this}
+                style={styles.accountContainer}>
+                <StatusBar animated={true} barStyle={'light-content'} />
+                <TouchableOpacity onPress={() => this.props.navigator.pop()}>
+                    <Text style={styles.accountBack}>Close</Text>
+                </TouchableOpacity>
                 <Text style={styles.accountHeaderText}>
                     Settings
                 </Text>
@@ -132,7 +150,7 @@ export default class Account extends Component {
                     {this.state.error}
                 </Text>
                 <ActivityIndicator animating={this.state.showProgress} size="large" style={styles.accountLoader} />
-            </View>
+            </YANavigator.Scene>
         );
     }
 }

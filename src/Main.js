@@ -1,5 +1,7 @@
+import YANavigator from 'react-native-ya-navigator';
 import React, { Component, PropTypes } from 'react';
-import { View, Text, ListView, TouchableHighlight, Keyboard, AppState } from 'react-native';
+import { View, Text, ListView, TouchableHighlight, Keyboard, AppState, StatusBar, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 import { NativeModules } from 'react-native';
 const NativeTouchID = NativeModules.TouchID;
@@ -7,6 +9,7 @@ const NativeTouchID = NativeModules.TouchID;
 import Header from './subviews/Header';
 import NoteItem from './subviews/NoteItem';
 import NoteScene from './Note';
+import AccountScene from './Account';
 import Storage from './Storage';
 import styles from './Styles';
 
@@ -21,6 +24,44 @@ export default class Main extends Component {
             icon: require('../img/navicon_password.png'),
             id: 'account'
         }]
+    }
+
+    onNewBtnPress() {
+        this.props.navigator.push({
+            component: NoteScene,
+            props: {
+                title:  "New note"
+            }
+        });
+    }
+
+    onAccountBtnPress() {
+        this.props.navigator.push({
+            component: AccountScene,
+            props: {
+                leftBtnText: 'Back',
+            },
+        });
+    }
+
+    static navigationDelegate = {
+        id: 'main',
+        renderTitle() {
+            return;
+        },
+        renderNavBarLeftPart() {
+            return <TouchableOpacity onPress={() => 'onAccountBtnPress'}>
+                        <Icon name="ios-cog" size={30} color="#75c38d" />
+                    </TouchableOpacity>;
+        },
+        renderNavBarRightPart() {
+            return (
+                  <TouchableOpacity onPress={() => 'onNewBtnPress'}>
+                        <Icon name="ios-create-outline" size={30} color="#75c38d" />
+                  </TouchableOpacity>
+            );
+        },
+        backBtnText: 'Notes',
     }
 
     constructor(props) {
@@ -44,23 +85,7 @@ export default class Main extends Component {
         };
     }
 
-    onNavigatorEvent(event) {
-        // this is the onPress handler for the two buttons together
-        if (event.type == 'NavBarButtonPress') {
-            // this is the event type for button presses
-            if (event.id == 'create') {
-                // this is the same id field from the static navigatorButtons definition
-                this.props.navigator.push({
-                    screen: 'NoteScreen',
-                    title:  "New note"
-                });
-            } else if (event.id == 'account') {
-                this.props.navigator.showModal({
-                    screen: "AccountScreen",
-                });
-            }
-        }
-    }
+
 
     checkTouchIDSupported() {
         return new Promise((resolve, reject) => {
@@ -90,7 +115,7 @@ export default class Main extends Component {
 
     enableInterface(debug) {
         this.getNotesList(debug);
-        this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+        // this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     }
 
     disableInterface() {
@@ -148,9 +173,12 @@ export default class Main extends Component {
     pressRow(id) {
         var note = this.state.notes.find((n) => n.uuid == id);
         this.props.navigator.push({
-            screen: 'NoteScreen',
-            title: note.title ? note.title : 'Note',
-            passProps: { note },
+            component: NoteScene,
+            props: {
+                leftBtnText: 'Notes',
+                title: note.title ? note.title : 'Note',
+                note: note
+            },
         });
     }
 
@@ -179,7 +207,13 @@ export default class Main extends Component {
 
     render() {
         return(
-            <View style={styles.page}>
+            <YANavigator.Scene
+                delegate={this}
+                style={styles.page}>
+                <StatusBar
+                    barStyle={'light-content'}
+                    animated={true}
+                    backgroundColor={'green'}/>
                 <ListView
                     ref="list"
                     dataSource={this.state.dataSource}
@@ -187,7 +221,7 @@ export default class Main extends Component {
                     renderRow={ (rowData, sectionID, rowID) => <NoteItem onPress={this.pressRow} note={rowData} /> }
                     enableEmptySections={true}
                 />
-            </View>
+            </YANavigator.Scene>
         );
     }
 }

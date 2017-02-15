@@ -3,6 +3,7 @@ import { View, TextInput, TouchableOpacity, Image } from 'react-native';
 
 import Storage from '../Storage';
 import styles from '../Styles';
+import NoteScene from '../Note';
 
 export default class NoteToolbar extends Component {
 
@@ -21,8 +22,10 @@ export default class NoteToolbar extends Component {
     handleNewPress() {
         console.log("New[toolbar] press");
         this.props.navigator.push({
-            screen: 'NoteScreen',
-            title:  "New note"
+            component: NoteScene,
+            props: {
+                title:  "New note"
+            }
         });
     }
 

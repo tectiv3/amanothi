@@ -12,9 +12,12 @@
     "react": "^15.4.2",
     "react-native": "^0.41.1",
     "react-native-aes-crypto": "^1.0.2",
+    "react-native-blur": "^2.0.0",
     "react-native-keyboard-spacer": "^0.3.1",
     "react-native-navigation": "git@github.com:tectiv3/react-native-navigation.git#master",
     "react-native-touch-id": "^3.0.0",
+    "react-native-vector-icons": "^4.0.0",
+    "react-native-ya-navigator": "^0.7.4",
     "redux": "^3.6.0"
   },
   "devDependencies": {

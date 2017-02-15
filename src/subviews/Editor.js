@@ -1,5 +1,6 @@
+import YANavigator from 'react-native-ya-navigator';
 import React, { Component } from 'react';
-import { AppRegistry, TextInput, View, ScrollView, StyleSheet, DeviceEventEmitter, LayoutAnimation, Dimensions, Keyboard } from 'react-native';
+import { AppRegistry, TextInput, View, ScrollView, StyleSheet, DeviceEventEmitter, LayoutAnimation, Dimensions, Keyboard, TouchableOpacity, Text } from 'react-native';
 
 import styles from '../Styles';
 
@@ -31,6 +32,17 @@ export default class Editor extends Component {
         this.setState({
             height: newSize,
         });
+        console.log("Keyboard show event")
+        this.props.navigator._navBar.updateUI({
+            rightPart: (
+                <TouchableOpacity onPress={() => 'onDoneBtnPress'}>
+                  <Text style={{color: '#75c38d', fontSize: 16, fontWeight: '400'}}>
+                      Done
+                  </Text>
+                </TouchableOpacity>
+            )
+        });
+        this.props.navigator._navBar.forceUpdate();
         // this.props.navigator.setButtons({leftButtons:[],rightButtons:[{ title: 'Done', id: 'done' }]});
     }
 
@@ -39,7 +51,9 @@ export default class Editor extends Component {
             height: Dimensions.get('window').height
         });
         this.props.onChange(this.state.text);
-        // this.props.navigator.setButtons({leftButtons:[],rightButtons:[]});
+        this.props.navigator._navBar.updateUI({
+            rightPart: ''
+        });
     }
 
     handleChange (text) {
@@ -49,7 +63,9 @@ export default class Editor extends Component {
 
     render() {
         return (
-            <ScrollView keyboardDismissMode='interactive' style={styles.page}>
+            <ScrollView keyboardDismissMode='interactive' style={styles.page, [{
+                paddingTop: YANavigator.Scene.navBarHeight,
+            }]}>
                     <TextInput
                         style={[styles.input, {height: this.state.height}]}
                         onChangeText={(text) => {

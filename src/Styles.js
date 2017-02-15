@@ -129,8 +129,15 @@ export default styles = StyleSheet.create({
         color: 'white',
         fontSize: 18
     },
+    accountBack: {
+        fontSize: 17,
+        textAlign: 'left',
+        color: '#75c38d',
+        marginBottom: 10,
+        marginTop: 10
+    },
     sectionWrapper: {
-      backgroundColor: '#28354a',
+        backgroundColor: '#28354a',
     //   borderBottomWidth: StyleSheet.hairlineWidth,
     //   borderBottomColor: '#75c38d',
     //   borderTopWidth: StyleSheet.hairlineWidth,

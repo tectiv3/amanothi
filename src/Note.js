@@ -1,5 +1,6 @@
+import YANavigator from 'react-native-ya-navigator';
 import React, { Component } from 'react';
-import { View, StyleSheet, Keyboard } from 'react-native';
+import { View, StyleSheet, Keyboard, StatusBar, TouchableOpacity, Text } from 'react-native';
 
 // import RichEditor from './subviews/RichEditor';
 import Editor from './subviews/Editor';
@@ -11,24 +12,6 @@ import styles from './Styles';
 
 export default class Note extends Component {
 
-    static navigatorButtons = {
-        rightButtons: [{
-            title: 'Done',
-            id: 'done'
-        }]
-    }
-
-    static navigatorStyle = {
-        navBarBackgroundColor: 'rgba(40,53,74,0.8)',
-        navBarTranslucent: true,
-        navBarTextColor: '#75c38d',
-        navBarSubtitleTextColor: '#75c38d',
-        navBarButtonColor: '#75c38d',
-        statusBarTextColorSchemeSingleScreen: 'light',
-        navBarNoBorder: true,
-        drawUnderNavBar: false,
-    }
-
     static defaultProps = {
         note: {
             title: "",
@@ -37,21 +20,43 @@ export default class Note extends Component {
         }
     }
 
+    onDoneBtnPress() {
+        console.log('On done press');
+        this.props.navigator._navBar.updateUI({
+            rightPart: ''
+        });
+        Keyboard.dismiss();
+    }
+
+    onNavBarLeftPartPress() {
+        this.props.navigator.immediatelyResetRouteStack([{
+            component: MainScene,
+        }]);
+    }
+
+    static navigationDelegate = {
+        id: 'note',
+        renderTitle(props) {
+            return (
+                <View>
+                    <Text style={{color: '#75c38d', fontSize: 16, fontWeight: '600'}}>
+                        {props.title}
+                    </Text>
+                </View>
+            );
+        },
+        renderNavBarRightPart() {
+            return ;
+        },
+        backBtnText: 'Notes',
+    }
+
     constructor(props) {
         super(props);
         this.state = {
             note: props.note
         };
         this.onChange = this.onChange.bind(this);
-        this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
-    }
-
-    onNavigatorEvent(event) {
-        if (event.type == 'NavBarButtonPress') {
-            if (event.id == 'done') {
-                Keyboard.dismiss();
-            }
-        }
     }
 
     onChange(text) {
@@ -61,16 +66,20 @@ export default class Note extends Component {
         this.setState({note});
         if (this.props.note.uuid) {
             console.log("Updating note.");
-            Storage.updateNote(this.state.note);
-        } else {
+            Storage.updateNote(note);
+        } else if (note.text != '') {
             console.log("Creating new note.");
-            Storage.createNote(this.state.note);
+            Storage.createNote(note);
         }
     }
 
     render() {
         return (
-            <View style={styles.page}>
+            <YANavigator.Scene
+                paddingTop={false}
+                delegate={this}
+                style={[styles.page]}
+            >
                 <Editor title={this.props.note.title}
                         text={this.props.note.text}
                         time={this.props.note.time}
@@ -78,7 +87,7 @@ export default class Note extends Component {
                         navigator={this.props.navigator}
                 />
                 <NoteToolbar navigator={this.props.navigator} note={this.props.note} />
-            </View>
+            </YANavigator.Scene>
         );
     }
 }

@@ -9,6 +9,7 @@ export default Header = (props) => (
             style = {styles.searchInput}
             placeholder = "Search"
             onChangeText = {(text) => props.onChange(text)}
+            autoCorrect={false}
         />
     </View>
 );
