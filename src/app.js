@@ -138,4 +138,4 @@ var styles = StyleSheet.create({
     activityIndicator: {},
 });
 */
-// AppRegistry.registerComponent('t3notes', () => NavigatorIOSApp);
+// AppRegistry.registerComponent('amanothi', () => NavigatorIOSApp);
