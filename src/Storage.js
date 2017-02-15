@@ -87,7 +87,7 @@ function decryptNote(note, key) {
     return new Promise(function(resolve, reject) {
         Aes.decrypt(note.key, key).then(async (note_key) => {
             try {
-                let hash = await Aes.hmac(note.content, note_key);
+                let hash = await Aes.hmac(note.content, key);
                 if (hash !== note.hash) {
                     console.log("Hmac doesn't match.")
                     reject("Hmac doesn't match");
@@ -114,7 +114,7 @@ async function encryptNote(note, key) {
             copy.content = cipher;
             copy.key  = note.key;
             copy.updated = note.updated;
-            Aes.hmac(copy.content, note_key).then(hash => {
+            Aes.hmac(copy.content, key).then(hash => {
                 copy.hash = hash;
                 resolve(copy);
             });
