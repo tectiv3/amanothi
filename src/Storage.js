@@ -3,34 +3,29 @@ var assign = require('object-assign');
 var EventEmitter = require('events').EventEmitter;
 var Aes = NativeModules.Aes;
 
-var _notes = null;
+var _notes   = null;
 var _account = null;
+// getReactNativeHost().getReactInstanceManager().getDevSupportManager().handleReloadJS(); //force reload
 
-loadAsyncAccount();
+loadAccountFromStorage();
 
-function loadAsyncAccount() {
+function loadAccountFromStorage() {
     return AsyncStorage.getItem('account').then(str => {
         if (!str) _account = {};
         else _account = JSON.parse(str);
+        if (!_account.settings) {
+            _account.settings = {};
+        }
     });
 }
 
-function loadAsyncStore() {
-    return AsyncStorage.getItem('notes').then(str => {
-        if (!str) _notes = [];
-        else _notes = JSON.parse(str);
-        Storage.emitChange();
-    });
-}
-
-function loadAsyncEncrypted() {
+function loadNotesFromStorage() {
     return AsyncStorage.getItem('enotes').then(str => {
         var encrypted = [];
         _notes = [];
         encrypted = JSON.parse(str);
         var promises = [];
         account = Storage.getAccount();
-        console.log(account);
         if (!encrypted) return [];
         encrypted.forEach(function (note) {
             promises.push(decryptNote(note, account.password));
@@ -45,13 +40,20 @@ function loadAsyncEncrypted() {
     });
 }
 
-function updateAsyncStore() {
+function updateNotesStorage() {
     var password = _account.password;
     if (!_notes) return;
     var promises = _notes.map((note) => encryptNote(note, password));
     return Promise.all(promises).then(function(encrypted) {
         return AsyncStorage.setItem('enotes', JSON.stringify(encrypted)).catch(err => { console.log("couldn't store note: " + err) });
     }).catch(function(err) {
+        console.log("Failed:", err);
+    });
+}
+
+function updateAccountStorage() {
+    console.log('Saving account to storage', _account);
+    return AsyncStorage.setItem('account', JSON.stringify(_account)).catch(function(err) {
         console.log("Failed:", err);
     });
 }
@@ -76,7 +78,7 @@ async function decryptItem(cipher, key) {
         result = await Aes.decrypt(cipher, key);
     } catch (e) {
         //doesn't catch reject
-        console.error(e);
+        console.log(e);
     }
     return result;
 }
@@ -125,8 +127,8 @@ var Storage = assign({}, EventEmitter.prototype, {
 
     getAll: function() {
         if (!_notes) {
-            console.log("Load from storage");
-            loadAsyncEncrypted();//.then(fetchFromServer).then(updateAsyncStore);
+            console.log("Get notes call.");
+            loadNotesFromStorage();//.then(fetchFromServer).then(updateNotesStorage);
             return [];
         } else {
             return _notes;
@@ -142,15 +144,20 @@ var Storage = assign({}, EventEmitter.prototype, {
         // data.email = data.email || 'change this';
         return Aes.sha256(data.password).then((hash) => {
             data.password = hash;
+            data.settings = _account.settings;
             _account = data;
             console.log('pw hash:', hash, _account);
         }).then(() => {
-            console.log('saving account');
-            AsyncStorage.setItem('account', JSON.stringify(_account));
+            updateAccountStorage();
         }).then(() => {
             console.log('Re-encrypting notes');
-            updateAsyncStore(data.password);
+            updateNotesStorage(data.password);
         }).catch(err => { console.log("couldn't store account: " + err) });
+    },
+
+    saveSetting: function(item, value) {
+        _account.settings[item] = value;
+        return updateAccountStorage();
     },
 
     createNote: function(note) {
@@ -160,7 +167,7 @@ var Storage = assign({}, EventEmitter.prototype, {
         note.deleted = false;
         _notes.push(note);
         this.emitChange();
-        return updateAsyncStore();
+        return updateNotesStorage();
     },
 
     updateNote: function (note) {
@@ -172,7 +179,7 @@ var Storage = assign({}, EventEmitter.prototype, {
             }
         }
         this.emitChange();
-        return updateAsyncStore();
+        return updateNotesStorage();
     },
 
     deleteNote: function (note) {
@@ -183,7 +190,7 @@ var Storage = assign({}, EventEmitter.prototype, {
             }
         }
         this.emitChange();
-        return updateAsyncStore();
+        return updateNotesStorage();
     },
 
     emitChange: function() {

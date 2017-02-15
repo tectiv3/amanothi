@@ -87,11 +87,15 @@ export default styles = StyleSheet.create({
     },
     accountContainer: {
         flex: 1,
-        justifyContent: 'flex-start',
-        alignItems: 'center',
         backgroundColor: '#28354a',
         padding: 10,
-        paddingTop: 80
+        paddingTop: 20
+    },
+    accountHeaderText: {
+        fontSize: 24,
+        alignSelf: "center",
+        color: "white",
+        marginBottom: 10
     },
     accountInput: {
         height: 50,
@@ -124,5 +128,28 @@ export default styles = StyleSheet.create({
     accountLabelText: {
         color: 'white',
         fontSize: 18
+    },
+    sectionWrapper: {
+      backgroundColor: '#28354a',
+    //   borderBottomWidth: StyleSheet.hairlineWidth,
+    //   borderBottomColor: '#75c38d',
+    //   borderTopWidth: StyleSheet.hairlineWidth,
+    //   borderTopColor: '#75c38d'
+    },
+    switchContainer: {
+        flexDirection: 'row',
+        flex: 1,
+        height: 44
+    },
+    switchTitle: {
+        flex: 1,
+        marginLeft: 15,
+        alignSelf: 'center',
+        color: 'white',
+        fontSize: 18
+    },
+    switchStyle: {
+        marginRight: 20,
+        alignSelf: 'center',
     },
 });

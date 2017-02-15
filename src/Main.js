@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Text, ListView, TouchableHighlight, Keyboard } from 'react-native';
+import { View, Text, ListView, TouchableHighlight, Keyboard, AppState } from 'react-native';
 
 import { NativeModules } from 'react-native';
 const NativeTouchID = NativeModules.TouchID;
@@ -27,16 +27,19 @@ export default class Main extends Component {
         super(props);
         let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => true});
         this.state = {
-            dataSource: ds.cloneWithRows([])
+            dataSource: ds.cloneWithRows([]),
+            appState: AppState.currentState,
+            previousAppStates: [],
+            memoryWarnings: 0,
         };
         this.pressRow = this.pressRow.bind(this);
         this.handleSearchChange = this.handleSearchChange.bind(this);
         this.getNotesList = this.getNotesList.bind(this);
         this.sortList = this.sortList.bind(this);
         this.onChange = () => {
-            var notes = this.getNotesList('on change event');
+            var notes = this.getNotesList('On change event');
             this.setState({notes});
-            console.log("On change!");
+            console.log("Storage change callback");
             this.sortList(notes);
         };
     }
@@ -59,45 +62,69 @@ export default class Main extends Component {
         }
     }
 
-    componentWillMount() {
-        console.log("Component will mount")
-        Storage.addChangeListener(this.onChange);
-        new Promise((resolve, reject) => {
+    checkTouchIDSupported() {
+        return new Promise((resolve, reject) => {
             NativeTouchID.isSupported(error => {
                 if (error) {
                     return reject(error.message);
                 }
                 resolve(true);
             });
-        }).then( () => {
-            new Promise( (resolve, reject) => {
-                NativeTouchID.authenticate("Unlock", error => {
-                    if (error) {
-                        return reject(error.message);
-                    }
-                    resolve(true);
-                });
-            }).then(() => {
-                console.log("OK");
-                this.getNotesList("touch id ok");
-                this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
-            }).catch((result) => {
-                console.log(result);
-                // this.props.navigator.showModal({screen: "AccountScreen"});
-            });
-        }).catch((result) => {
-            this.getNotesList("no touch id");
-            this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
         });
+    }
+
+    componentWillMount() {
+        Storage.addChangeListener(this.onChange);
+        this.checkTouchIDSupported().then(() => {
+            if (Storage.getAccount().settings && Storage.getAccount().settings.TouchID_enabled) {
+                return new Promise( (resolve, reject) => {
+                    NativeTouchID.authenticate("Unlock", error => {
+                        return error ? reject(error.message) : resolve(true);
+                    });
+                }).then(() => this.enableInterface("TouchID success")).catch(() => this.disableInterface());
+            } else {
+                this.enableInterface("TouchID not enabled");
+            }
+        }).catch(() => this.enableInterface("No TouchID"));
+    }
+
+    enableInterface(debug) {
+        this.getNotesList(debug);
+        this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+    }
+
+    disableInterface() {
+        //buttons unclickable and no notes being loaded
+        console.log();
     }
 
     componentDidMount() {
         this.refs.list.scrollTo({x:0, y:45, animated: false});
+        AppState.addEventListener('change', this._handleAppStateChange);
+        AppState.addEventListener('memoryWarning', this._handleMemoryWarning);
     }
 
     componentWillUnmount() {
         Storage.removeChangeListener(this.onChange);
+        AppState.removeEventListener('change', this._handleAppStateChange);
+        AppState.removeEventListener('memoryWarning', this._handleMemoryWarning);
     }
+
+    _handleMemoryWarning = () => {
+        this.setState({memoryWarnings: this.state.memoryWarnings + 1});
+    };
+
+    _handleAppStateChange = (appState) => {
+        var previousAppStates = this.state.previousAppStates.slice();
+        previousAppStates.push(this.state.appState);
+        if (appState == "active") {
+            this.forceUpdate();
+        }
+        this.setState({
+            appState,
+            previousAppStates,
+        });
+    };
 
     sortList(notes) {
         console.log('Sorting...')
@@ -114,7 +141,7 @@ export default class Main extends Component {
     }
 
     getNotesList(caller) {
-        console.log('Load from storage.', caller);
+        console.log('Ask storage for notes', caller);
         return Storage.getAll();
     }
 
@@ -128,7 +155,7 @@ export default class Main extends Component {
     }
 
     handleSearchChange(text) {
-        console.log("Searching...")
+        console.log("Searching...", text);
         var search = text.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
         if (search == '') {
             notes = this.state.notes;

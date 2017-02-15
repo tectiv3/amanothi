@@ -30,14 +30,16 @@ export default class Editor extends Component {
         let newSize = Dimensions.get('window').height - e.endCoordinates.height - 65;
         this.setState({
             height: newSize,
-        })
+        });
+        // this.props.navigator.setButtons({leftButtons:[],rightButtons:[{ title: 'Done', id: 'done' }]});
     }
 
     keyboardDidHide (e) {
         this.setState({
             height: Dimensions.get('window').height
-        })
+        });
         this.props.onChange(this.state.text);
+        // this.props.navigator.setButtons({leftButtons:[],rightButtons:[]});
     }
 
     handleChange (text) {

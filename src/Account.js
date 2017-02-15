@@ -5,6 +5,7 @@ import { AppRegistry,
         TextInput,
         ActivityIndicator,
         TouchableHighlight,
+        Switch,
         } from 'react-native';
 import Storage from './Storage';
 import styles from './Styles';
@@ -37,8 +38,10 @@ export default class Account extends Component {
             password: account.password,
             error: "",
             showProgress: false,
+            TouchID_enabled: account.settings && account.settings.TouchID_enabled
         }
         this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+        this.handleSwitchTouchid = this.handleSwitchTouchid.bind(this);
     }
 
     onNavigatorEvent(event) {
@@ -86,23 +89,45 @@ export default class Account extends Component {
         }
     }
 
+    handleSwitchTouchid(value) {
+        console.log("Touch ID switch", value);
+        Storage.saveSetting('TouchID_enabled', value);
+        this.setState({TouchID_enabled: value});
+    }
+
     render() {
         return (
             <View style={styles.accountContainer}>
-                <Text style={styles.accountLabelText}>
-                    Encryption password
+                <Text style={styles.accountHeaderText}>
+                    Settings
                 </Text>
-                <TextInput
-                    onChangeText={ (text)=> this.setState({password: text}) }
-                    style={styles.accountInput}
-                    placeholder="Password"
-                    value={this.state.password}>
-                </TextInput>
-                <TouchableHighlight onPress={this.onLoginPressed.bind(this)} style={styles.accountButton}>
-                    <Text style={styles.accountButtonText}>
-                        Save
-                    </Text>
-                </TouchableHighlight>
+                <View style={[styles.sectionWrapper, {height: 44}]}>
+                    <View style={styles.switchContainer}>
+                        <Text style={styles.switchTitle}>
+                            {this.state.TouchID_enabled ? 'Touch ID On' : 'Touch ID Off'}
+                        </Text>
+                        <Switch
+                            onValueChange={this.handleSwitchTouchid}
+                            style={styles.switchStyle}
+                            onTintColor={"#75c38d"}
+                            value={this.state.TouchID_enabled} />
+                    </View>
+                </View>
+                <View style={styles.sectionWrapper}>
+                    <TextInput
+                        onChangeText={ (text)=> this.setState({password: text}) }
+                        style={styles.accountInput}
+                        autoCorrect={false}
+                        placeholderTextColor={'#75c38d'}
+                        placeholder="Encryption password"
+                        value={this.state.password}>
+                    </TextInput>
+                    <TouchableHighlight onPress={this.onLoginPressed.bind(this)} style={styles.accountButton}>
+                        <Text style={styles.accountButtonText}>
+                            Save
+                        </Text>
+                    </TouchableHighlight>
+                </View>
                 <Text style={styles.accountError}>
                     {this.state.error}
                 </Text>

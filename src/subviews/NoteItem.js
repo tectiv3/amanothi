@@ -30,6 +30,7 @@ export default class NoteItem extends Component {
         );
     }
 }
+// <Text style={{color:"red", fontSize:9, position:"absolute", top:2,right:5}}>{this.props.note.uuid}</Text>
 
 NoteItem.propTypes = {
     note:    React.PropTypes.object.isRequired,

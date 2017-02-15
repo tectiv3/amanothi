@@ -75,6 +75,7 @@ export default class Note extends Component {
                         text={this.props.note.text}
                         time={this.props.note.time}
                         onChange={this.onChange}
+                        navigator={this.props.navigator}
                 />
                 <NoteToolbar navigator={this.props.navigator} note={this.props.note} />
             </View>
