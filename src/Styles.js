@@ -143,13 +143,24 @@ export default styles = StyleSheet.create({
     },
     switchTitle: {
         flex: 1,
-        marginLeft: 15,
+        marginLeft: 0,
         alignSelf: 'center',
         color: 'white',
         fontSize: 18
     },
     switchStyle: {
-        marginRight: 20,
+        marginRight: 0,
         alignSelf: 'center',
+    },
+    modalHeader: {
+        height: 44,
+        paddingTop: 20,
+        paddingLeft: 10,
+        backgroundColor: 'rgba(40,53,74,0.8)',
+        // borderBottomWidth: StyleSheet.hairlineWidth,
+        // borderBottomColor: '#75c38d'
+    },
+    modalText: {
+        color: "#75c38d",
     },
 });

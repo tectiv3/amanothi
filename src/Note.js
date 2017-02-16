@@ -6,17 +6,9 @@ import Editor from './subviews/Editor';
 import NoteToolbar from './subviews/NoteToolbar';
 
 import Storage from './Storage';
-
 import styles from './Styles';
 
 export default class Note extends Component {
-
-    static navigatorButtons = {
-        rightButtons: [{
-            title: 'Done',
-            id: 'done'
-        }]
-    }
 
     static defaultProps = {
         note: {
@@ -32,15 +24,6 @@ export default class Note extends Component {
             note: props.note
         };
         this.onChange = this.onChange.bind(this);
-        // this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
-    }
-
-    onNavigatorEvent(event) {
-        if (event.type == 'NavBarButtonPress') {
-            if (event.id == 'done') {
-                Keyboard.dismiss();
-            }
-        }
     }
 
     onChange(text) {

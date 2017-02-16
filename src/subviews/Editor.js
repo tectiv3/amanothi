@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AppRegistry, TextInput, View, ScrollView, StyleSheet, DeviceEventEmitter, LayoutAnimation, Dimensions, Keyboard, InteractionManager } from 'react-native';
+import { TextInput, View, ScrollView, StyleSheet, DeviceEventEmitter, LayoutAnimation, Dimensions, Keyboard, InteractionManager } from 'react-native';
 import RNSNavigator, {NavigationButton } from 'react-native-simple-navi';
 
 import styles from '../Styles';
@@ -28,6 +28,7 @@ export default class Editor extends Component {
     }
 
     componentDidMount () {
+        //autofocused keyboard slowdowns animation, this is a workaround
         InteractionManager.runAfterInteractions(() => {
             if (!this.state.text) {
                 this.refs['editor'].focus();

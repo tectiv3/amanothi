@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Text, ListView, TouchableHighlight, Keyboard, AppState } from 'react-native';
+import { View, Text, ListView, TouchableHighlight, Keyboard, AppState, Navigator } from 'react-native';
 import RNSNavigator, {NavigationButton, NavigatorMixin} from 'react-native-simple-navi';
 
 import { NativeModules } from 'react-native';
@@ -46,24 +46,6 @@ export default class Main extends Component {
         };
     }
 
-    onNavigatorEvent(event) {
-        // this is the onPress handler for the two buttons together
-        if (event.type == 'NavBarButtonPress') {
-            // this is the event type for button presses
-            if (event.id == 'create') {
-                // this is the same id field from the static navigatorButtons definition
-                this.props.navigator.push({
-                    screen: 'NoteScreen',
-                    title:  "New note"
-                });
-            } else if (event.id == 'account') {
-                this.props.navigator.showModal({
-                    screen: "AccountScreen",
-                });
-            }
-        }
-    }
-
     checkTouchIDSupported() {
         return new Promise((resolve, reject) => {
             NativeTouchID.isSupported(error => {
@@ -95,7 +77,15 @@ export default class Main extends Component {
         this.props.navigationController && this.props.navigationController.setLeftBarItem(NavigationButton);
         this.props.setLeftProps && this.props.setLeftProps({
             barItemType: 'icon',
-            onPress: () => this.navigatorPush('Account', AccountScene),             barItemImage: require('../img/navicon_password.png')});
+            onPress: () => {
+                this.props.goForward({
+                    component: AccountScene,
+                    sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+                    backButtonTitle: 'Close',
+                    hideNavigationBar: true
+                });
+            },
+            barItemImage: require('../img/navicon_password.png')});
 
         this.props.navigationController && this.props.navigationController.setRightBarItem(NavigationButton);
         this.props.setRightProps && this.props.setRightProps({barItemType: 'icon', onPress: ()=>this.navigatorPush('New note', NoteScene), barItemImage: require('../img/navicon_new.png')});

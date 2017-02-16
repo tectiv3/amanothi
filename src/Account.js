@@ -1,34 +1,20 @@
 import React, { Component } from 'react';
-import { AppRegistry,
+import {
         View,
         Text,
         TextInput,
         ActivityIndicator,
         TouchableHighlight,
+        TouchableOpacity,
         Switch,
+        StyleSheet,
         } from 'react-native';
+
 import Storage from './Storage';
 import styles from './Styles';
+import ModalHeader from './subviews/ModalHeader';
 
 export default class Account extends Component {
-
-    static navigatorStyle = {
-        navBarBackgroundColor: 'rgba(40,53,74,0.8)',
-        navBarTranslucent: true,
-        navBarTextColor: '#75c38d',
-        navBarSubtitleTextColor: '#75c38d',
-        navBarButtonColor: '#75c38d',
-        statusBarTextColorSchemeSingleScreen: 'light',
-        navBarNoBorder: true,
-        drawUnderNavBar: false,
-    }
-
-    static navigatorButtons = {
-        leftButtons: [{
-            title: 'Close',
-            id: 'close'
-        }]
-    };
 
     constructor(props) {
         super(props);
@@ -68,7 +54,7 @@ export default class Account extends Component {
     //       //On success we will store the access_token in the AsyncStorage
         //   this.storeToken("{valid: true}");
             this.setState({showProgress: false});
-            this.props.navigator.pop();
+            this.props.goBack();
         //   this.props.navigator.popToRoot();
     //   } else {
     //       //Handle error
@@ -90,6 +76,8 @@ export default class Account extends Component {
 
     render() {
         return (
+        <View style={styles.page}>
+            <ModalHeader goBack={this.props.goBack} />
             <View style={styles.accountContainer}>
                 <Text style={styles.accountHeaderText}>
                     Settings
@@ -97,7 +85,7 @@ export default class Account extends Component {
                 <View style={[styles.sectionWrapper, {height: 44}]}>
                     <View style={styles.switchContainer}>
                         <Text style={styles.switchTitle}>
-                            {this.state.TouchID_enabled ? 'Touch ID On' : 'Touch ID Off'}
+                            Use Touch ID
                         </Text>
                         <Switch
                             onValueChange={this.handleSwitchTouchid}
@@ -126,6 +114,7 @@ export default class Account extends Component {
                 </Text>
                 <ActivityIndicator animating={this.state.showProgress} size="large" style={styles.accountLoader} />
             </View>
+        </View>
         );
     }
 }
