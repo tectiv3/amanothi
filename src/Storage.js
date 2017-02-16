@@ -141,7 +141,7 @@ var Storage = assign({}, EventEmitter.prototype, {
 
     saveAccount: function(data) {
         //on password change expire all other devices sessions
-        // data.email = data.email || 'change this';
+        if (data.password == _account.password) return;
         return Aes.sha256(data.password).then((hash) => {
             data.password = hash;
             data.settings = _account.settings;
