@@ -1,6 +1,5 @@
 import React, { Component, PropTypes } from 'react';
 import { View, Text, ListView, TouchableHighlight, Keyboard, AppState, Navigator } from 'react-native';
-import RNSNavigator, {NavigationButton, NavigatorMixin} from 'react-native-simple-navi';
 
 import { NativeModules } from 'react-native';
 const NativeTouchID = NativeModules.TouchID;
@@ -13,17 +12,6 @@ import Storage from './Storage';
 import styles from './Styles';
 
 export default class Main extends Component {
-
-    static navigatorButtons = {
-        rightButtons: [{
-            icon: require('../img/navicon_new.png'),
-            id: 'create'
-        }],
-        leftButtons: [{
-            icon: require('../img/navicon_password.png'),
-            id: 'account'
-        }]
-    }
 
     constructor(props) {
         super(props);
@@ -89,7 +77,10 @@ export default class Main extends Component {
 
         this.props.navigationController && this.props.navigationController.setRightBarButton({
             barItemType: 'icon',
-            onPress: ()=>this.navigatorPush('New note', NoteScene),
+            onPress: () => this.props.goForward({
+                title: 'New note',
+                component: NoteScene,
+            }),
             barItemImage: require('../img/navicon_new.png')
         });
         // this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
@@ -128,6 +119,11 @@ export default class Main extends Component {
         });
     };
 
+    willFocus() {
+        console.log("On focus main");
+        this.forceUpdate();
+    }
+
     sortList(notes) {
         console.log('Sorting...')
         //hide deleted here todo:unless in trash bin then the opposite
@@ -149,14 +145,11 @@ export default class Main extends Component {
 
     pressRow(id) {
         var note = this.state.notes.find((n) => n.uuid == id);
-        this.navigatorPush((note.title ? note.title : 'Note'), NoteScene, {note});
-        // this.props.goForward && this.props.goForward({title: , component: NoteScene, passProps: {note}});
-
-        // this.props.navigator.push({
-        //     screen: 'NoteScreen',
-        //     title: note.title ? note.title : 'Note',
-        //     passProps: { note },
-        // });
+        this.props.goForward({
+            title: (note.title ? note.title : 'Note'),
+            component: NoteScene,
+            passProps: {note}
+        });
     }
 
     handleSearchChange(text) {
@@ -196,5 +189,3 @@ export default class Main extends Component {
         );
     }
 }
-
-Object.assign(Main.prototype, NavigatorMixin);

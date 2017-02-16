@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { View, StyleSheet, Keyboard } from 'react-native';
-import RNSNavigator, {NavigationButton } from 'react-native-simple-navi';
 
 // import RichEditor from './subviews/RichEditor';
 import Editor from './subviews/Editor';
@@ -25,6 +24,8 @@ export default class Note extends Component {
             note: props.note
         };
         this.onChange = this.onChange.bind(this);
+        this.handleDeletePress = this.handleDeletePress.bind(this);
+        this.handleNewPress = this.handleNewPress.bind(this);
     }
 
     componentWillMount () {
@@ -41,7 +42,7 @@ export default class Note extends Component {
         this.props.navigationController && this.props.navigationController.setRightBarButton({
             barItemType: 'text',
             barItemTitle: 'Done',
-            onPress: ()=> Keyboard.dismiss(),
+            onPress: () => Keyboard.dismiss(),
         });
     }
 
@@ -63,6 +64,24 @@ export default class Note extends Component {
         }
     }
 
+    handleDeletePress() {
+        console.log("Delete press", this.props.note);
+        if (this.props.note.uuid) {
+            var note = Object.assign({}, this.props.note);
+            note.deleted = new Date().toISOString();
+            Storage.deleteNote(note);
+        }
+        this.props.navigator.popToTop();
+    }
+
+    handleNewPress() {
+        console.log("New[toolbar] press");
+        this.props.goForward({
+            title: 'New note',
+            component: Note,
+        });
+    }
+
     render() {
         return (
             <View style={styles.page}>
@@ -71,7 +90,7 @@ export default class Note extends Component {
                         time={this.props.note.time}
                         onChange={this.onChange}
                 />
-                <NoteToolbar navigator={this.props.navigator} note={this.props.note} />
+                <NoteToolbar onLeftAction={this.handleDeletePress} onRightAction={this.handleNewPress} />
             </View>
         );
     }
