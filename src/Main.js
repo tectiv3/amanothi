@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Text, ListView, TouchableHighlight, Keyboard, AppState } from 'react-native';
+import { View, Text, ListView, AppState, StyleSheet } from 'react-native';
 
 import { NativeModules } from 'react-native';
 const NativeTouchID = NativeModules.TouchID;
@@ -31,6 +31,7 @@ export default class Main extends Component {
             appState: AppState.currentState,
             previousAppStates: [],
             memoryWarnings: 0,
+            notes: []
         };
         this.pressRow = this.pressRow.bind(this);
         this.handleSearchChange = this.handleSearchChange.bind(this);
@@ -191,6 +192,11 @@ export default class Main extends Component {
                     renderRow={ (rowData, sectionID, rowID) => <NoteItem onPress={this.pressRow} note={rowData} /> }
                     enableEmptySections={true}
                 />
+                <View style={{alignSelf:'center'}}>
+                    <Text style={{color: 'red', fontSize: 11}}>
+                        {'Notes count: ' + this.state.notes.filter(note => !note.deleted).length+' [Total: '+this.state.notes.length+']'}
+                    </Text>
+                </View>
             </View>
         );
     }
