@@ -33,4 +33,4 @@ export default class AmanothiApp extends React.Component {
     }
 }
 
-AppRegistry.registerComponent('amanothi', () => AmanothiApp);
+AppRegistry.registerComponent('Amanothi', () => AmanothiApp);

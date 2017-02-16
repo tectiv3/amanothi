@@ -1,6 +1,6 @@
 import YANavigator from 'react-native-ya-navigator';
 import React, { Component } from 'react';
-import { AppRegistry, TextInput, View, ScrollView, StyleSheet, DeviceEventEmitter, LayoutAnimation, Dimensions, Keyboard, TouchableOpacity, Text } from 'react-native';
+import { TextInput, View, ScrollView, DeviceEventEmitter, LayoutAnimation, Dimensions, Keyboard, TouchableOpacity, Text, InteractionManager } from 'react-native';
 
 import styles from '../Styles';
 
@@ -19,6 +19,14 @@ export default class Editor extends Component {
         this.setState({
             height: Dimensions.get('window').height - 65
         })
+    }
+
+    componentDidMount () {
+        InteractionManager.runAfterInteractions(() => {
+            if (!this.state.text) {
+                this.refs['editor'].focus();
+            }
+        });
     }
 
     componentWillUnmount () {
@@ -67,13 +75,13 @@ export default class Editor extends Component {
                 paddingTop: YANavigator.Scene.navBarHeight,
             }]}>
                     <TextInput
+                        ref="editor"
                         style={[styles.input, {height: this.state.height}]}
                         onChangeText={(text) => {
                             this.setState({text});
                         }}
                         value={this.state.text}
                         multiline={true}
-                        autoFocus={!this.state.text}
                     />
             </ScrollView>
         );

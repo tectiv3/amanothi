@@ -12,7 +12,7 @@
   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
   
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
-                                                      moduleName:@"amanothi"
+                                                      moduleName:@"Amanothi"
                                                initialProperties:nil
                                                    launchOptions:launchOptions];
   
