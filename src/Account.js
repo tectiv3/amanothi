@@ -40,14 +40,7 @@ export default class Account extends Component {
             showProgress: false,
             TouchID_enabled: account.settings && account.settings.TouchID_enabled
         }
-        this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
         this.handleSwitchTouchid = this.handleSwitchTouchid.bind(this);
-    }
-
-    onNavigatorEvent(event) {
-        if (event.id == 'close') {
-            this.props.navigator.dismissModal();
-        }
     }
 
     async onLoginPressed() {
@@ -75,7 +68,7 @@ export default class Account extends Component {
     //       //On success we will store the access_token in the AsyncStorage
         //   this.storeToken("{valid: true}");
             this.setState({showProgress: false});
-            this.props.navigator.dismissModal();
+            this.props.navigator.pop();
         //   this.props.navigator.popToRoot();
     //   } else {
     //       //Handle error

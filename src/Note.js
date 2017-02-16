@@ -43,7 +43,7 @@ export default class Note extends Component {
             note: props.note
         };
         this.onChange = this.onChange.bind(this);
-        this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+        // this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     }
 
     onNavigatorEvent(event) {
@@ -61,10 +61,10 @@ export default class Note extends Component {
         this.setState({note});
         if (this.props.note.uuid) {
             console.log("Updating note.");
-            Storage.updateNote(this.state.note);
+            Storage.updateNote(note);
         } else {
             console.log("Creating new note.");
-            Storage.createNote(this.state.note);
+            Storage.createNote(note);
         }
     }
 

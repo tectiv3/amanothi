@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { View, Text, ListView, TouchableHighlight, Keyboard, AppState } from 'react-native';
+import RNSNavigator, {NavigationButton, NavigatorMixin} from 'react-native-simple-navi';
 
 import { NativeModules } from 'react-native';
 const NativeTouchID = NativeModules.TouchID;
@@ -7,6 +8,7 @@ const NativeTouchID = NativeModules.TouchID;
 import Header from './subviews/Header';
 import NoteItem from './subviews/NoteItem';
 import NoteScene from './Note';
+import AccountScene from './Account';
 import Storage from './Storage';
 import styles from './Styles';
 
@@ -90,16 +92,23 @@ export default class Main extends Component {
 
     enableInterface(debug) {
         this.getNotesList(debug);
-        this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+        this.props.navigationController && this.props.navigationController.setLeftBarItem(NavigationButton);
+        this.props.setLeftProps && this.props.setLeftProps({
+            barItemType: 'icon',
+            onPress: () => this.navigatorPush('Account', AccountScene),             barItemImage: require('../img/navicon_password.png')});
+
+        this.props.navigationController && this.props.navigationController.setRightBarItem(NavigationButton);
+        this.props.setRightProps && this.props.setRightProps({barItemType: 'icon', onPress: ()=>this.navigatorPush('New note', NoteScene), barItemImage: require('../img/navicon_new.png')});
+        // this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     }
 
     disableInterface() {
-        //buttons unclickable and no notes being loaded
+        //buttons unclickable and notes aren't loaded
         console.log();
     }
 
     componentDidMount() {
-        this.refs.list.scrollTo({x:0, y:45, animated: false});
+        this.refs.list.scrollTo({x:0, y:48, animated: false});
         AppState.addEventListener('change', this._handleAppStateChange);
         AppState.addEventListener('memoryWarning', this._handleMemoryWarning);
     }
@@ -147,11 +156,14 @@ export default class Main extends Component {
 
     pressRow(id) {
         var note = this.state.notes.find((n) => n.uuid == id);
-        this.props.navigator.push({
-            screen: 'NoteScreen',
-            title: note.title ? note.title : 'Note',
-            passProps: { note },
-        });
+        this.navigatorPush((note.title ? note.title : 'Note'), NoteScene, {note});
+        // this.props.goForward && this.props.goForward({title: , component: NoteScene, passProps: {note}});
+
+        // this.props.navigator.push({
+        //     screen: 'NoteScreen',
+        //     title: note.title ? note.title : 'Note',
+        //     passProps: { note },
+        // });
     }
 
     handleSearchChange(text) {
@@ -191,3 +203,5 @@ export default class Main extends Component {
         );
     }
 }
+
+Object.assign(Main.prototype, NavigatorMixin);
