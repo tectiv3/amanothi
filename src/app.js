@@ -19,6 +19,7 @@ export default class App extends Component {
                     navbarStyle={{backgroundColor: 'rgba(40,53,74,0.8)'}}
                     titleStyle={{color: '#75c38d'}}
                     buttonStyle={{tintColor: '#75c38d'}}
+                    textStyle={{color: '#75c38d'}}
                 />
         );
     }

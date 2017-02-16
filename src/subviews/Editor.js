@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { AppRegistry, TextInput, View, ScrollView, StyleSheet, DeviceEventEmitter, LayoutAnimation, Dimensions, Keyboard } from 'react-native';
+import { AppRegistry, TextInput, View, ScrollView, StyleSheet, DeviceEventEmitter, LayoutAnimation, Dimensions, Keyboard, InteractionManager } from 'react-native';
+import RNSNavigator, {NavigationButton } from 'react-native-simple-navi';
 
 import styles from '../Styles';
 
@@ -26,12 +27,21 @@ export default class Editor extends Component {
         this.props.onChange(this.state.text);
     }
 
+    componentDidMount () {
+        InteractionManager.runAfterInteractions(() => {
+            if (!this.state.text) {
+                this.refs['editor'].focus();
+            }
+        });
+    }
+
     keyboardDidShow (e) {
         let newSize = Dimensions.get('window').height - e.endCoordinates.height - 65;
         this.setState({
             height: newSize,
         });
-        // this.props.navigator.setButtons({leftButtons:[],rightButtons:[{ title: 'Done', id: 'done' }]});
+        this.props.navigationController && this.props.navigationController.setRightBarItem(NavigationButton);
+this.props.setRightProps && this.props.setRightProps({barItemType: 'text', onPress: ()=>Keyboard.dismiss(), barItemTitle: 'Done'});
     }
 
     keyboardDidHide (e) {
@@ -39,7 +49,8 @@ export default class Editor extends Component {
             height: Dimensions.get('window').height
         });
         this.props.onChange(this.state.text);
-        // this.props.navigator.setButtons({leftButtons:[],rightButtons:[]});
+        this.props.navigationController && this.props.navigationController.setRightBarItem(NavigationButton);
+        this.props.setRightProps && this.props.setRightProps({barItemType: 'empty'});
     }
 
     handleChange (text) {
@@ -51,13 +62,13 @@ export default class Editor extends Component {
         return (
             <ScrollView keyboardDismissMode='interactive' style={styles.page}>
                     <TextInput
+                        ref="editor"
                         style={[styles.input, {height: this.state.height}]}
                         onChangeText={(text) => {
                             this.setState({text});
                         }}
                         value={this.state.text}
                         multiline={true}
-                        autoFocus={!this.state.text}
                     />
             </ScrollView>
         );

@@ -18,17 +18,6 @@ export default class Note extends Component {
         }]
     }
 
-    static navigatorStyle = {
-        navBarBackgroundColor: 'rgba(40,53,74,0.8)',
-        navBarTranslucent: true,
-        navBarTextColor: '#75c38d',
-        navBarSubtitleTextColor: '#75c38d',
-        navBarButtonColor: '#75c38d',
-        statusBarTextColorSchemeSingleScreen: 'light',
-        navBarNoBorder: true,
-        drawUnderNavBar: false,
-    }
-
     static defaultProps = {
         note: {
             title: "",
@@ -75,7 +64,8 @@ export default class Note extends Component {
                         text={this.props.note.text}
                         time={this.props.note.time}
                         onChange={this.onChange}
-                        navigator={this.props.navigator}
+                        navigationController={this.props.navigationController}
+                        setRightProps={this.props.setRightProps}
                 />
                 <NoteToolbar navigator={this.props.navigator} note={this.props.note} />
             </View>
