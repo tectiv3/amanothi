@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, Keyboard } from 'react-native';
+import { View, StyleSheet, Keyboard, InteractionManager } from 'react-native';
 
 // import RichEditor from './subviews/RichEditor';
 import Editor from './subviews/Editor';
@@ -12,10 +12,7 @@ import styles from './Styles';
 export default class Note extends Component {
 
     static navigatorButtons = {
-        rightButtons: [{
-            title: 'Done',
-            id: 'done'
-        }]
+        rightButtons: []
     }
 
     static navigatorStyle = {
@@ -43,13 +40,17 @@ export default class Note extends Component {
             note: props.note
         };
         this.onChange = this.onChange.bind(this);
+        this.handleDeletePress = this.handleDeletePress.bind(this);
+        this.handleNewPress = this.handleNewPress.bind(this);
         this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     }
 
     onNavigatorEvent(event) {
+        console.log('Note event', event);
         if (event.type == 'NavBarButtonPress') {
             if (event.id == 'done') {
                 Keyboard.dismiss();
+                this.props.navigator.setButtons({leftButtons:[],rightButtons:[], animated: false});
             }
         }
     }
@@ -61,11 +62,42 @@ export default class Note extends Component {
         this.setState({note});
         if (this.props.note.uuid) {
             console.log("Updating note.");
-            Storage.updateNote(this.state.note);
+            Storage.updateNote(note);
         } else {
             console.log("Creating new note.");
-            Storage.createNote(this.state.note);
+            Storage.createNote(note);
         }
+    }
+
+    handleDeletePress() {
+        console.log("Delete press", this.props.note);
+        if (this.props.note.uuid) {
+            var note = Object.assign({}, this.props.note);
+            note.deleted = new Date().toISOString();
+            Storage.deleteNote(note);
+        }
+        this.props.navigator.popToRoot();
+    }
+
+    handleNewPress() {
+        console.log("New[toolbar] press");
+        this.props.navigator.push({
+            screen: 'NoteScreen',
+            title:  "New note",
+            backButtonTitle: "Notes"
+        });
+    }
+
+    componentWillMount () {
+        this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.keyboardDidShow.bind(this));
+    }
+
+    componentWillUnmount () {
+        this.keyboardDidShowListener.remove();
+    }
+
+    keyboardDidShow (e) {
+        this.props.navigator.setButtons({leftButtons:[],rightButtons:[{ title: 'Done', id: 'done' }], animated: false});
     }
 
     render() {
@@ -75,9 +107,11 @@ export default class Note extends Component {
                         text={this.props.note.text}
                         time={this.props.note.time}
                         onChange={this.onChange}
-                        navigator={this.props.navigator}
                 />
-                <NoteToolbar navigator={this.props.navigator} note={this.props.note} />
+                <NoteToolbar
+                    onLeftAction={this.handleDeletePress}
+                    onRightAction={this.handleNewPress}
+                />
             </View>
         );
     }

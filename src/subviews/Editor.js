@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AppRegistry, TextInput, View, ScrollView, StyleSheet, DeviceEventEmitter, LayoutAnimation, Dimensions, Keyboard } from 'react-native';
+import { TextInput, View, ScrollView, StyleSheet, DeviceEventEmitter, LayoutAnimation, Dimensions, Keyboard, InteractionManager } from 'react-native';
 
 import styles from '../Styles';
 
@@ -20,6 +20,14 @@ export default class Editor extends Component {
         })
     }
 
+    componentDidMount () {
+        InteractionManager.runAfterInteractions(() => {
+            if (!this.state.text) {
+                this.refs['editor'].focus();
+            }
+        });
+    }
+
     componentWillUnmount () {
         this.keyboardDidShowListener.remove();
         this.keyboardDidHideListener.remove();
@@ -31,7 +39,6 @@ export default class Editor extends Component {
         this.setState({
             height: newSize,
         });
-        // this.props.navigator.setButtons({leftButtons:[],rightButtons:[{ title: 'Done', id: 'done' }]});
     }
 
     keyboardDidHide (e) {
@@ -39,7 +46,6 @@ export default class Editor extends Component {
             height: Dimensions.get('window').height
         });
         this.props.onChange(this.state.text);
-        // this.props.navigator.setButtons({leftButtons:[],rightButtons:[]});
     }
 
     handleChange (text) {
@@ -51,13 +57,13 @@ export default class Editor extends Component {
         return (
             <ScrollView keyboardDismissMode='interactive' style={styles.page}>
                     <TextInput
+                        ref="editor"
                         style={[styles.input, {height: this.state.height}]}
                         onChangeText={(text) => {
                             this.setState({text});
                         }}
                         value={this.state.text}
                         multiline={true}
-                        autoFocus={!this.state.text}
                     />
             </ScrollView>
         );

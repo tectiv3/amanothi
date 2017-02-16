@@ -89,7 +89,7 @@ export default styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#28354a',
         padding: 10,
-        paddingTop: 20
+        paddingTop: 10
     },
     accountHeaderText: {
         fontSize: 24,
@@ -143,13 +143,13 @@ export default styles = StyleSheet.create({
     },
     switchTitle: {
         flex: 1,
-        marginLeft: 15,
+        marginLeft: 0,
         alignSelf: 'center',
         color: 'white',
         fontSize: 18
     },
     switchStyle: {
-        marginRight: 20,
+        marginRight: 0,
         alignSelf: 'center',
     },
 });

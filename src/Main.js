@@ -45,6 +45,7 @@ export default class Main extends Component {
     }
 
     onNavigatorEvent(event) {
+        console.log('main event', event);
         // this is the onPress handler for the two buttons together
         if (event.type == 'NavBarButtonPress') {
             // this is the event type for button presses
@@ -59,6 +60,9 @@ export default class Main extends Component {
                     screen: "AccountScreen",
                 });
             }
+        }
+        if (event.id === 'backPress') {
+            this.props.navigator.popToRoot();
         }
     }
 

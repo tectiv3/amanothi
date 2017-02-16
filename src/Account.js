@@ -104,7 +104,7 @@ export default class Account extends Component {
                 <View style={[styles.sectionWrapper, {height: 44}]}>
                     <View style={styles.switchContainer}>
                         <Text style={styles.switchTitle}>
-                            {this.state.TouchID_enabled ? 'Touch ID On' : 'Touch ID Off'}
+                            Use Touch ID
                         </Text>
                         <Switch
                             onValueChange={this.handleSwitchTouchid}
