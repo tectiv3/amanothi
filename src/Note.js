@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { View, StyleSheet, Keyboard } from 'react-native';
+import RNSNavigator, {NavigationButton } from 'react-native-simple-navi';
 
 // import RichEditor from './subviews/RichEditor';
 import Editor from './subviews/Editor';
@@ -26,6 +27,28 @@ export default class Note extends Component {
         this.onChange = this.onChange.bind(this);
     }
 
+    componentWillMount () {
+        this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.keyboardDidShow.bind(this));
+        this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this.keyboardDidHide.bind(this));
+    }
+
+    componentWillUnmount () {
+        this.keyboardDidShowListener.remove();
+        this.keyboardDidHideListener.remove();
+    }
+
+    keyboardDidShow (e) {
+        this.props.navigationController && this.props.navigationController.setRightBarButton({
+            barItemType: 'text',
+            barItemTitle: 'Done',
+            onPress: ()=> Keyboard.dismiss(),
+        });
+    }
+
+    keyboardDidHide (e) {
+        this.props.navigationController && this.props.navigationController.setRightBarButton({});
+    }
+
     onChange(text) {
         if (this.state.note.text == text.trim()) return;
         var note = Object.assign({}, this.state.note);
@@ -47,8 +70,6 @@ export default class Note extends Component {
                         text={this.props.note.text}
                         time={this.props.note.time}
                         onChange={this.onChange}
-                        navigationController={this.props.navigationController}
-                        setRightProps={this.props.setRightProps}
                 />
                 <NoteToolbar navigator={this.props.navigator} note={this.props.note} />
             </View>

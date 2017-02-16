@@ -74,8 +74,7 @@ export default class Main extends Component {
 
     enableInterface(debug) {
         this.getNotesList(debug);
-        this.props.navigationController && this.props.navigationController.setLeftBarItem(NavigationButton);
-        this.props.setLeftProps && this.props.setLeftProps({
+        this.props.navigationController && this.props.navigationController.setLeftBarButton({
             barItemType: 'icon',
             onPress: () => {
                 this.props.goForward({
@@ -85,10 +84,14 @@ export default class Main extends Component {
                     hideNavigationBar: true
                 });
             },
-            barItemImage: require('../img/navicon_password.png')});
+            barItemImage: require('../img/navicon_password.png')
+        });
 
-        this.props.navigationController && this.props.navigationController.setRightBarItem(NavigationButton);
-        this.props.setRightProps && this.props.setRightProps({barItemType: 'icon', onPress: ()=>this.navigatorPush('New note', NoteScene), barItemImage: require('../img/navicon_new.png')});
+        this.props.navigationController && this.props.navigationController.setRightBarButton({
+            barItemType: 'icon',
+            onPress: ()=>this.navigatorPush('New note', NoteScene),
+            barItemImage: require('../img/navicon_new.png')
+        });
         // this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     }
 

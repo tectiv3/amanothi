@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { View, TextInput, TouchableOpacity, Image } from 'react-native';
+import RNSNavigator, {NavigatorMixin} from 'react-native-simple-navi';
 
+import NoteScene from '../Note';
 import Storage from '../Storage';
 import styles from '../Styles';
 
@@ -15,15 +17,12 @@ export default class NoteToolbar extends Component {
         var note = Object.assign({}, this.props.note);
         note.deleted = new Date().toISOString();
         Storage.deleteNote(note);
-        this.props.navigator.pop();
+        this.props.navigator.popToTop();
     }
 
     handleNewPress() {
         console.log("New[toolbar] press");
-        this.props.navigator.push({
-            screen: 'NoteScreen',
-            title:  "New note"
-        });
+        this.navigatorPush('New note', NoteScene);
     }
 
     render() {
@@ -57,3 +56,5 @@ export default class NoteToolbar extends Component {
 NoteToolbar.propTypes = {
     note:    React.PropTypes.object
 }
+
+Object.assign(NoteToolbar.prototype, NavigatorMixin);
