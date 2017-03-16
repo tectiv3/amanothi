@@ -104,14 +104,18 @@ export default styles = StyleSheet.create({
         fontSize: 18,
         borderWidth: 1,
         borderColor: '#75c38d',
+        // backgroundColor: 'rgba(249,247,247,0.3)',
         color: 'white'
     },
     accountButton: {
+        flex: 1,
+        // paddingTop: 10,
         height: 50,
         backgroundColor: '#75c38d',
-        alignSelf: 'stretch',
-        marginTop: 10,
-        justifyContent: 'center'
+        // marginTop: 10,
+        justifyContent: 'center',
+        borderWidth: 1,
+        alignItems: 'flex-start'
     },
     accountButtonText: {
         fontSize: 22,
@@ -123,14 +127,20 @@ export default styles = StyleSheet.create({
         paddingTop: 10
     },
     accountLoader: {
-        marginTop: 20
+        marginTop: -40
     },
     accountLabelText: {
         color: 'white',
         fontSize: 18
     },
+    accountTitle: {
+        marginLeft: 0,
+        alignSelf: 'center',
+        color: 'white',
+        fontSize: 18
+    },
     sectionWrapper: {
-      backgroundColor: '#28354a',
+        backgroundColor: '#28354a',
     //   borderBottomWidth: StyleSheet.hairlineWidth,
     //   borderBottomColor: '#75c38d',
     //   borderTopWidth: StyleSheet.hairlineWidth,
@@ -152,4 +162,8 @@ export default styles = StyleSheet.create({
         marginRight: 0,
         alignSelf: 'center',
     },
+    flexRow: {
+        flex: 1,
+        flexDirection: 'row'
+    }
 });

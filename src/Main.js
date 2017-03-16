@@ -25,7 +25,9 @@ export default class Main extends Component {
 
     constructor(props) {
         super(props);
-        let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => true});
+        let ds = new ListView.DataSource({
+            rowHasChanged: (r1, r2) => true
+        });
         this.state = {
             dataSource: ds.cloneWithRows([]),
             appState: AppState.currentState,
@@ -39,7 +41,9 @@ export default class Main extends Component {
         this.sortList = this.sortList.bind(this);
         this.onChange = () => {
             var notes = this.getNotesList('On change event');
-            this.setState({notes});
+            this.setState({
+                notes
+            });
             console.log("Storage change callback");
             this.sortList(notes);
         };
@@ -54,7 +58,7 @@ export default class Main extends Component {
                 // this is the same id field from the static navigatorButtons definition
                 this.props.navigator.push({
                     screen: 'NoteScreen',
-                    title:  "New note"
+                    title: "New note"
                 });
             } else if (event.id == 'account') {
                 this.props.navigator.showModal({
@@ -82,7 +86,7 @@ export default class Main extends Component {
         Storage.addChangeListener(this.onChange);
         this.checkTouchIDSupported().then(() => {
             if (Storage.getAccount().settings && Storage.getAccount().settings.TouchID_enabled) {
-                return new Promise( (resolve, reject) => {
+                return new Promise((resolve, reject) => {
                     NativeTouchID.authenticate("Unlock", error => {
                         return error ? reject(error.message) : resolve(true);
                     });
@@ -104,7 +108,11 @@ export default class Main extends Component {
     }
 
     componentDidMount() {
-        this.refs.list.scrollTo({x:0, y:45, animated: false});
+        this.refs.list.scrollTo({
+            x: 0,
+            y: 45,
+            animated: false
+        });
         AppState.addEventListener('change', this._handleAppStateChange);
         AppState.addEventListener('memoryWarning', this._handleMemoryWarning);
     }
@@ -116,7 +124,9 @@ export default class Main extends Component {
     }
 
     _handleMemoryWarning = () => {
-        this.setState({memoryWarnings: this.state.memoryWarnings + 1});
+        this.setState({
+            memoryWarnings: this.state.memoryWarnings + 1
+        });
     };
 
     _handleAppStateChange = (appState) => {
@@ -136,7 +146,8 @@ export default class Main extends Component {
         //hide deleted here todo:unless in trash bin then the opposite
         notes = notes.filter(note => !note.deleted);
         notes.sort(function(a, b) {
-            var dateA = new Date(a.updated), dateB = new Date(b.updated);
+            var dateA = new Date(a.updated),
+                dateB = new Date(b.updated);
             return dateB - dateA;
         });
         this.setState({
@@ -155,7 +166,9 @@ export default class Main extends Component {
         this.props.navigator.push({
             screen: 'NoteScreen',
             title: note.title ? note.title : 'Note',
-            passProps: { note },
+            passProps: {
+                note
+            },
         });
     }
 
@@ -172,7 +185,8 @@ export default class Main extends Component {
             });
             console.log(notes);
             notes.sort(function(a, b) {
-                var dateA = new Date(a.updated), dateB = new Date(b.updated);
+                var dateA = new Date(a.updated),
+                    dateB = new Date(b.updated);
                 return dateB - dateA;
             });
         }
@@ -183,21 +197,15 @@ export default class Main extends Component {
     }
 
     render() {
-        return(
-            <View style={styles.page}>
-                <ListView
-                    ref="list"
-                    dataSource={this.state.dataSource}
-                    renderHeader={() => <Header onChange={this.handleSearchChange} />}
-                    renderRow={ (rowData, sectionID, rowID) => <NoteItem onPress={this.pressRow} note={rowData} /> }
-                    enableEmptySections={true}
-                />
-                <View style={{alignSelf:'center'}}>
-                    <Text style={{color: 'red', fontSize: 11}}>
-                        {'Notes count: ' + this.state.notes.filter(note => !note.deleted).length+' [Total: '+this.state.notes.length+']'}
+        return (
+            <View style={ styles.page }>
+                <ListView ref="list" dataSource={ this.state.dataSource } renderHeader={ () => <Header onChange={ this.handleSearchChange } /> } renderRow={ (rowData, sectionID, rowID) => <NoteItem onPress={ this.pressRow } note={ rowData } /> } enableEmptySections={ true } />
+                <View style={ {alignSelf:'center'} }>
+                    <Text style={ {color: 'red', fontSize: 11} }>
+                        { 'Notes count: ' + this.state.notes.filter(note => !note.deleted).length+' [Total: '+this.state.notes.length+']' }
                     </Text>
                 </View>
             </View>
-        );
+            );
     }
 }

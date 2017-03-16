@@ -29,7 +29,7 @@ export default class Note extends Component {
     static defaultProps = {
         note: {
             title: "",
-            text:  "",
+            text: "",
             updated: 0
         }
     }
@@ -50,7 +50,11 @@ export default class Note extends Component {
         if (event.type == 'NavBarButtonPress') {
             if (event.id == 'done') {
                 Keyboard.dismiss();
-                this.props.navigator.setButtons({leftButtons:[],rightButtons:[], animated: false});
+                this.props.navigator.setButtons({
+                    leftButtons: [],
+                    rightButtons: [],
+                    animated: false
+                });
             }
         }
     }
@@ -59,7 +63,9 @@ export default class Note extends Component {
         if (this.state.note.text == text.trim()) return;
         var note = Object.assign({}, this.state.note);
         note.text = text.trim();
-        this.setState({note});
+        this.setState({
+            note
+        });
         if (this.props.note.uuid) {
             console.log("Updating note.");
             Storage.updateNote(note);
@@ -83,40 +89,40 @@ export default class Note extends Component {
         console.log("New[toolbar] press");
         this.props.navigator.push({
             screen: 'NoteScreen',
-            title:  "New note",
+            title: "New note",
             backButtonTitle: "Notes"
         });
     }
 
-    componentWillMount () {
+    componentWillMount() {
         this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.keyboardDidShow.bind(this));
     }
 
-    componentWillUnmount () {
+    componentWillUnmount() {
         this.keyboardDidShowListener.remove();
     }
 
-    keyboardDidShow (e) {
-        this.props.navigator.setButtons({leftButtons:[],rightButtons:[{ title: 'Done', id: 'done' }], animated: false});
+    keyboardDidShow(e) {
+        this.props.navigator.setButtons({
+            leftButtons: [],
+            rightButtons: [{
+                title: 'Done',
+                id: 'done'
+            }],
+            animated: false
+        });
     }
 
     render() {
         return (
-            <View style={styles.page}>
-                <Editor title={this.props.note.title}
-                        text={this.props.note.text}
-                        time={this.props.note.time}
-                        onChange={this.onChange}
-                />
-                <NoteToolbar
-                    onLeftAction={this.handleDeletePress}
-                    onRightAction={this.handleNewPress}
-                />
+            <View style={ styles.page }>
+                <Editor title={ this.props.note.title } text={ this.props.note.text } time={ this.props.note.time } onChange={ this.onChange } />
+                <NoteToolbar onLeftAction={ this.handleDeletePress } onRightAction={ this.handleNewPress } />
             </View>
-        );
+            );
     }
 }
 
 Note.propTypes = {
-    note:    React.PropTypes.object
+    note: React.PropTypes.object
 }
