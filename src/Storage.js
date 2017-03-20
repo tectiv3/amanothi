@@ -1,6 +1,5 @@
 import { AsyncStorage, NativeModules } from 'react-native';
 var assign = require('object-assign');
-var fetch = require('fetch');
 const fetchWithRetries = require('fbjs/lib/fetchWithRetries');
 var EventEmitter = require('events').EventEmitter;
 var Aes = NativeModules.Aes;
@@ -32,26 +31,29 @@ function fetchStatus(response) {
 }
 
 function fetchError(error) {
-    console.log('Request failed', error.response)
+    console.log('Request failed', error)
+    if (error.response == undefined)
+        throw new Error(error.message)
     if (error.response.headers.get('Content-Type') == 'application/json') {
-        return error.response.json().then(function(json) {
+        return error.response.json().then((json) => {
             throw new Error(json.errors)
         });
     }
-    return error.response.text().then(function(text) {
+    return error.response.text().then((text) => {
         throw new Error(text)
     });
 }
 
-function getParams() {
+function getParams(server, email) {
     var init = {
         body: '',
         method: 'GET'
     };
-    return fetchWithRetries(_account.server + "/auth/params?email=" + _account.email, init)
-        .then(fetchStatus).then((response) => response.json()).catch(fetchError).catch((error) => {
-        console.log(error)
-    });
+
+    return fetchWithRetries(server + "/auth/params?email=" + email, init)
+        .then(fetchStatus)
+        .then((response) => response.json())
+        .catch(fetchError)
 }
 
 function fetchFromServer() {
@@ -60,6 +62,7 @@ function fetchFromServer() {
         console.log("no server address")
         return Promise.resolve()
     }
+
     if (_account.token == "" || _account.token == undefined) {
         console.log("not authorized")
         return Promise.resolve()
@@ -73,12 +76,17 @@ function fetchFromServer() {
     };
 
     return fetchWithRetries(_account.server + "/items/sync", init)
-        .then(fetchStatus).then((response) => response.json())
+        .then(fetchStatus).then((response) => response.json()).catch(fetchError)
         .then((responseData) => {
-            console.log('response object:', responseData)
-        }).catch(fetchError).catch((error) => {
-        console.log(error)
-    })
+            // console.log('response object:', responseData)
+            return Storage.decryptNotes(responseData.retrieved_items).then(() => {
+                _account.sync_token = responseData.sync_token
+                return Storage.saveAccount(_account)
+            })
+        })
+        .catch((error) => {
+            console.log(error)
+        })
 }
 
 function loadNotesFromStorage() {
@@ -87,19 +95,7 @@ function loadNotesFromStorage() {
         var encrypted = [];
         _notes = [];
         encrypted = JSON.parse(str);
-        var promises = [];
-        account = Storage.getAccount();
-        if (!encrypted) return [];
-        encrypted.forEach(function(note) {
-            promises.push(decryptNote(note, account.password));
-        });
-        return Promise.all(promises).then(function(results) {
-            results.forEach(function(item) {
-                var note = JSON.parse(item.substring(4));
-                _notes.push(note);
-            });
-            Storage.emitChange();
-        }).catch(error => console.log(error));
+        return Storage.decryptNotes(encrypted).catch(error => console.log(error));
     });
 }
 
@@ -152,21 +148,127 @@ async function decryptItem(cipher, key) {
     return result;
 }
 
+function encryptionComponentsFromString(string, baseKey, encryptionKey, authKey) {
+    var encryptionVersion = string.substring(0, 3);
+    if (encryptionVersion === "001") {
+        return {
+            contentCiphertext: string.substring(3),
+            encryptionVersion: encryptionVersion,
+            ciphertextToAuth: string,
+            iv: null,
+            authHash: null,
+            encryptionKey: baseKey,
+            authKey: authKey
+        }
+    } else {
+        let components = string.split(":");
+        return {
+            encryptionVersion: components[0],
+            authHash: components[1],
+            iv: components[2],
+            contentCiphertext: components[3],
+            ciphertextToAuth: [components[0], components[2], components[3]].join(":"),
+            encryptionKey: encryptionKey,
+            authKey: authKey
+        }
+    }
+}
+
+async function getKeys() {
+    if (!_account.encryptionKey) {
+        try {
+            _account.encryptionKey = await Aes.hmac256(_account.mk, toHex("e"));
+            _account.authKey = await Aes.hmac256(_account.mk, toHex("a"));
+        } catch (e) {
+            console.log("key generation error")
+        }
+    }
+    return {
+        mk: _account.mk,
+        encryptionKey: _account.encryptionKey,
+        authKey: _account.authKey
+    };
+}
+
+async function decryptText({ciphertextToAuth, contentCiphertext, encryptionKey, iv, authHash, authKey} = {}, requiresAuth) {
+    if (requiresAuth && !authHash) {
+        console.error("Auth hash is required.");
+        return;
+    }
+
+    console.log("authHash:", authHash);
+    if (authHash) {
+        try {
+            let hash = await Aes.hmac256(ciphertextToAuth, authKey);
+            console.log("hmac:", hash);
+            if (authHash !== hash) {
+                console.log("Hmac doesn't match.")
+                return ""
+            }
+        } catch (e) {
+            console.log("Hmac error", e);
+        }
+    }
+
+    return await Aes.decrypt(contentCiphertext, encryptionKey)
+}
+
 function decryptNote(note, key) {
     return new Promise(function(resolve, reject) {
-        Aes.decrypt(note.key, key).then(async(note_key) => {
-            try {
-                let hash = await Aes.hmac(note.content, key);
-                if (hash !== note.hash) {
-                    console.log("Hmac doesn't match.")
-                    reject("Hmac doesn't match");
-                }
-                await Aes.decrypt(note.content, note_key).then(
-                    (result) => resolve(result)).catch((err) => console.log("Decrypt error:", err));
-            } catch (e) {
-                reject("Hash error");
+        console.log("note_enc:", note.enc_item_key, "key:", key);
+        var encryptedItemKey = note.enc_item_key;
+        var requiresAuth = true;
+        if (encryptedItemKey.startsWith("002") === false) {
+            // legacy encryption type, has no prefix
+            encryptedItemKey = "001" + encryptedItemKey;
+            requiresAuth = false;
+        }
+        getKeys().then(async(result) => {
+            var keys = result
+            var keyParams = encryptionComponentsFromString(encryptedItemKey, keys.mk, keys.encryptionKey, keys.authKey);
+            // console.log("keyParams", keyParams);
+            var item_key = await decryptText(keyParams, requiresAuth);
+            console.log("item_key after decryptText:", item_key);
+            if (!item_key) {
+                return reject("decrypt error");
             }
-        }).catch((err) => console.log("Decrypt error:", err));
+
+            // decrypt content
+            var ek = item_key.substring(0, 64);
+            var ak = item_key.substring(64);
+            var itemParams = encryptionComponentsFromString(note.content, ek, ek, ak);
+            console.log("itemParams", itemParams, note.auth_hash);
+            if (!itemParams.authHash) {
+                itemParams.authHash = note.auth_hash;
+            }
+            var content = await decryptText(itemParams, false);
+            if (!content) {
+                return reject("decrypt error")
+            }
+            var json = JSON.parse(content);
+            note.text = json.text
+            note.title = json.title
+            console.log(content, note);
+            resolve(note)
+        })
+    /*
+            Aes.decrypt(note.enc_item_key, key).then(async(note_key) => {
+                console.log("Decrypted note key:", note_key)
+                console.log("note:", note);
+                try {
+                    let hash = await Aes.hmac256(note.content, key);
+                    if (hash !== note.hash) {
+                        console.log("Hmac doesn't match.")
+                        reject("Hmac doesn't match");
+                    }
+                    return Aes.decrypt(note.content, note_key)
+                        .then((result) => resolve(result))
+                        .catch((err) => console.log("Decrypt error:", err));
+                } catch (e) {
+                    reject("Hash error");
+                }
+            }).catch((err) => console.log("Decrypt error:", err));
+            */
     });
 }
 
@@ -185,14 +287,22 @@ async function encryptNote(note, key) {
                 copy.uuid = note.uuid;
                 copy.content = cipher;
                 copy.key = note.key;
-                copy.updated = note.updated;
-                Aes.hmac(copy.content, key).then(hash => {
+                copy.updated_at = note.updated_at;
+                Aes.hmac256(copy.content, key).then(hash => {
                     copy.hash = hash;
                     resolve(copy);
                 });
             });
     });
     return p;
+}
+
+function toHex(str) {
+    var hex = '';
+    for (var i = 0; i < str.length; i++) {
+        hex += '' + str.charCodeAt(i).toString(16);
+    }
+    return hex;
 }
 
 var Storage = assign({}, EventEmitter.prototype, {
@@ -213,12 +323,14 @@ var Storage = assign({}, EventEmitter.prototype, {
 
     saveAccount: function(data) {
         if (data.password != _account.password) {
-            console.log("password changed")
-            return Aes.sha256(data.password).then((hash) => {
-                data.password = hash;
+            console.log("password changed", data)
+            return Aes.pbkdf2(data.password, data.params.pw_salt).then((hash) => {
+                console.log("hash:", hash)
+                data.password = hash.substring(0, 64);
+                data.mk = hash.substring(64);
                 data.settings = _account.settings;
                 _account = data;
-                console.log('pw hash:', hash, _account);
+                console.log('account:', _account);
             }).then(updateAccountStorage).then(() => {
                 console.log('Re-encrypting notes');
                 updateNotesStorage(data.password);
@@ -265,22 +377,19 @@ var Storage = assign({}, EventEmitter.prototype, {
     },
 
     loginUser: function(data) {
-        return Storage.saveAccount({
-            password: data.password,
-            email: data.email,
-            server: data.server
-        }).then(getParams).then((params) => {
-            console.log("Params:", params);
-
+        return getParams(data.server, data.email).then((params) => {
+            console.log("on login, before save account", params);
+            return Storage.saveAccount({
+                password: data.password,
+                email: data.email,
+                server: data.server,
+                params: params
+            })
+        }).then(() => {
             var init = {
                 body: JSON.stringify({
                     email: _account.email,
-                    password: _account.password,
-                    pw_alg: "sha256",
-                    pw_cost: 5000,
-                    pw_func: 'pbkdf2',
-                    pw_key_size: 512,
-                    pw_salt: _account.salt
+                    password: _account.password
                 }),
                 method: 'POST',
                 headers: {
@@ -291,7 +400,8 @@ var Storage = assign({}, EventEmitter.prototype, {
             return fetchWithRetries(_account.server + "/auth/sign_in", init)
                 .then(fetchStatus).then((response) => response.json())
                 .then((responseData) => {
-                    console.log('ResponseData:', responseData)
+                    _account.token = responseData.token
+                    return Storage.saveAccount(_account).then(fetchFromServer).then(updateNotesStorage).then(() => this.emitChange);
                 }).catch(fetchError)
         })
     },
@@ -302,8 +412,8 @@ var Storage = assign({}, EventEmitter.prototype, {
     },
 
     createNote: function(note) {
-        note.created = new Date().toISOString();
-        note.updated = note.created;
+        note.created_at = new Date().toISOString();
+        note.updated_at = note.created_at;
         note.uuid = generateUUID();
         note.deleted = false;
         _notes.push(note);
@@ -314,7 +424,7 @@ var Storage = assign({}, EventEmitter.prototype, {
     updateNote: function(note) {
         for (var i = 0; i < _notes.length; i++) {
             if (_notes[i].uuid == note.uuid) {
-                note.updated = new Date().toISOString();
+                note.updated_at = new Date().toISOString();
                 _notes[i] = note;
                 break;
             }
@@ -332,6 +442,22 @@ var Storage = assign({}, EventEmitter.prototype, {
         }
         this.emitChange();
         return updateNotesStorage();
+    },
+
+    decryptNotes: function(encrypted) {
+        var promises = []
+        if (!encrypted) return Promise.resolve()
+        encrypted.forEach(function(note) {
+            if (!note.deleted && note.content_type == "Note") {
+                promises.push(decryptNote(note, _account.mk));
+            }
+        })
+        return Promise.all(promises).then((results) => {
+            results.forEach(function(item) {
+                _notes.push(item);
+            })
+            Storage.emitChange()
+        })
     },
 
     emitChange: function() {

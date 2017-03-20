@@ -30,7 +30,7 @@ export default class Note extends Component {
         note: {
             title: "",
             text: "",
-            updated: 0
+            updated_at: 0
         }
     }
 

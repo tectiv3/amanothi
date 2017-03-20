@@ -16,23 +16,27 @@ export default class NoteItem extends Component {
 
     render() {
         return (
-            <TouchableHighlight onPress={this.handlePress}>
-                <View style={styles.listItem}>
-                    <Text numberOfLines={1} style={styles.titleLabel}>{this.props.note.title ? this.props.note.title : this.props.note.text}</Text>
-                    <View style={styles.infoContainer}>
-                        <Text style={styles.timeLabel}>{moment((this.props.note.updated)).fromNow()}</Text>
-                        <Text numberOfLines={1} style={styles.previewLabel}>
-                            {this.props.note.text.split(/\r\n|\n|\r/).slice(1,2).toString() || 'No additional content'}
+            <TouchableHighlight onPress={ this.handlePress }>
+                <View style={ styles.listItem }>
+                    <Text numberOfLines={ 1 } style={ styles.titleLabel }>
+                        { this.props.note.title ? this.props.note.title : this.props.note.text }
+                    </Text>
+                    <View style={ styles.infoContainer }>
+                        <Text style={ styles.timeLabel }>
+                            { moment((this.props.note.updated_at)).fromNow() }
+                        </Text>
+                        <Text numberOfLines={ 1 } style={ styles.previewLabel }>
+                            { this.props.note.text.split(/\r\n|\n|\r/).slice(1,2).toString() || 'No additional content' }
                         </Text>
                     </View>
                 </View>
             </TouchableHighlight>
-        );
+            );
     }
 }
 // <Text style={{color:"red", fontSize:9, position:"absolute", top:2,right:5}}>{this.props.note.uuid}</Text>
 
 NoteItem.propTypes = {
-    note:    React.PropTypes.object.isRequired,
+    note: React.PropTypes.object.isRequired,
     onPress: React.PropTypes.func
 }

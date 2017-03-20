@@ -146,8 +146,8 @@ export default class Main extends Component {
         //hide deleted here todo:unless in trash bin then the opposite
         notes = notes.filter(note => !note.deleted);
         notes.sort(function(a, b) {
-            var dateA = new Date(a.updated),
-                dateB = new Date(b.updated);
+            var dateA = new Date(a.updated_at),
+                dateB = new Date(b.updated_at);
             return dateB - dateA;
         });
         this.setState({
@@ -183,10 +183,9 @@ export default class Main extends Component {
                 var regex = new RegExp(search, "gi");
                 return regex.test(note.text);
             });
-            console.log(notes);
             notes.sort(function(a, b) {
-                var dateA = new Date(a.updated),
-                    dateB = new Date(b.updated);
+                var dateA = new Date(a.updated_at),
+                    dateB = new Date(b.updated_at);
                 return dateB - dateA;
             });
         }
