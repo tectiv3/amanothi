@@ -45,7 +45,7 @@ function fetchError(error) {
     });
 }
 
-function getParams(server, email) {
+function getAuthParams(server, email) {
     var init = {
         body: '',
         method: 'GET'
@@ -57,8 +57,8 @@ function getParams(server, email) {
         .catch(fetchError)
 }
 
-function fetchFromServer() {
-    console.log("fetchFromServer", _account.server)
+function syncWithServer() {
+    console.log("syncWithServer", _account.server)
     if (_account.server == "" || _account.server == undefined) {
         console.log("no server address")
         return Promise.resolve()
@@ -175,13 +175,36 @@ function encryptionComponentsFromString(string, baseKey, encryptionKey, authKey)
     }
 }
 
+async function createAuthParams(data) {
+    var params = {
+        pw_func: "pbkdf2",
+        pw_alg: "sha256",
+        pw_key_size: 512,
+        pw_cost: 5000,
+        pw_nonce: generateRandomKey(),
+        pw_salt: "",
+        password: "",
+        mk: ""
+    };
+    try {
+        params.pw_salt = await Aes.sha1(data.email + "SN" + params.pw_nonce);
+        var hash = await Aes.pbkdf2(data.password, params.pw_salt);
+        console.log("pw hash:", hash)
+        params.password = hash.substring(0, 64);
+        params.mk = hash.substring(64);
+    } catch (e) {
+        return Promise.reject(e.message)
+    }
+    return Promise.resolve(params)
+}
+
 async function getKeys() {
     if (!_account.encryptionKey) {
         try {
             _account.encryptionKey = await Aes.hmac256(_account.mk, toHex("e"));
             _account.authKey = await Aes.hmac256(_account.mk, toHex("a"));
         } catch (e) {
-            console.log("key generation error")
+            console.log("key generation error:", e.message)
         }
     }
     return {
@@ -319,7 +342,7 @@ var Storage = assign({}, EventEmitter.prototype, {
     getAll: function() {
         if (!_notes) {
             console.log("Get notes call.");
-            loadNotesFromStorage().then(fetchFromServer).then(updateNotesStorage);
+            loadNotesFromStorage().then(syncWithServer).then(updateNotesStorage);
             return [];
         } else {
             return _notes;
@@ -331,67 +354,76 @@ var Storage = assign({}, EventEmitter.prototype, {
     },
 
     saveAccount: function(data) {
-        if (data.password != _account.password && data.password != "") {
-            console.log("password changed", data)
-            return Aes.pbkdf2(data.password, data.params.pw_salt).then((hash) => {
-                console.log("pw hash:", hash)
-                data.password = hash.substring(0, 64);
-                data.mk = hash.substring(64);
-                data.settings = _account.settings;
-                data.params = _account.params;
-                _account = data;
-                console.log('account:', _account);
-            }).then(updateAccountStorage).then(() => {
-                console.log('Re-encrypting notes');
-                updateNotesStorage(data.password);
-            }).catch(err => {
-                console.log("couldn't store account: ", err)
-            });
-        } else {
-            data.settings = _account.settings;
-            data.params = _account.params;
-            _account = data;
-            return updateAccountStorage().catch(err => {
-                console.log("account save error: ", err)
-            })
-        }
+        //TODO: total rewrite! account manager for keys generation, parameters and account and settings storage
+        // if (data.password != _account.password && data.password != "") {
+        //     console.log("password changed", data)
+        //     return Aes.pbkdf2(data.password, data.params.pw_salt).then((hash) => {
+        //         console.log("pw hash:", hash)
+        //         data.password = hash.substring(0, 64);
+        //         data.mk = hash.substring(64);
+        //         data.settings = _account.settings;
+        //         data.params = _account.params;
+        //         _account = data;
+        //         console.log('account:', _account);
+        //     }).then(updateAccountStorage).then(() => {
+        //         console.log('Re-encrypting notes');
+        //         updateNotesStorage(data.password);
+        //     }).catch(err => {
+        //         console.log("couldn't store account: ", err)
+        //     });
+        // } else {
+        data.settings = _account.settings;
+        data.params = data.params != undefined ? data.params : _account.params;
+        _account = data;
+        return updateAccountStorage().catch(err => {
+            console.log("account save error: ", err)
+        })
+    // }
     },
 
     registerUser: function(data) {
-        return Storage.saveAccount({
-            password: data.password,
-            email: data.email,
-            server: data.server
-        }).then(() => {
-            var init = {
-                body: JSON.stringify({
-                    email: _account.email,
-                    password: _account.password,
-                    pw_alg: "sha256",
-                    pw_cost: 5000,
-                    pw_func: 'pbkdf2',
-                    pw_key_size: 512,
-                    pw_salt: _account.salt
-                }),
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                },
-            };
-            return fetchWithRetries(_account.server + "/auth", init)
-                .then(fetchStatus).then((response) => response.json())
-                .then((responseData) => {
-                    console.log('ResponseData:', responseData)
-                }).catch(fetchError)
+        return createAuthParams(data).then((params) => {
+            console.log("created:", params);
+            Storage.saveAccount({
+                password: params.password,
+                mk: params.mk,
+                email: data.email,
+                server: data.server,
+                params: params
+            }).then(() => {
+                var init = {
+                    body: JSON.stringify({
+                        email: _account.email,
+                        password: _account.password,
+                        pw_alg: params.pw_alg,
+                        pw_cost: params.pw_cost,
+                        pw_func: params.pw_func,
+                        pw_key_size: params.pw_key_size,
+                        pw_nonce: params.pw_nonce
+                    }),
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                };
+                return fetchWithRetries(_account.server + "/auth", init)
+                    .then(fetchStatus).then((response) => response.json())
+                    .then((responseData) => {
+                        _account.token = responseData.token
+                        return Storage.saveAccount(_account).then(syncWithServer).then(updateNotesStorage).then(() => this.emitChange());
+                    }).catch(fetchError)
+            })
         })
     },
 
     loginUser: function(data) {
-        return getParams(data.server, data.email).then((params) => {
-            console.log("on login, before save account", params);
+        return getAuthParams(data.server, data.email).then(async(params) => {
+            var hash = await Aes.pbkdf2(data.password, params.pw_salt);
+            console.log("pw hash:", hash)
             return Storage.saveAccount({
-                password: data.password,
+                password: hash.substring(0, 64),
+                mk: hash.substring(64),
                 email: data.email,
                 server: data.server,
                 params: params
@@ -412,7 +444,7 @@ var Storage = assign({}, EventEmitter.prototype, {
                 .then(fetchStatus).then((response) => response.json())
                 .then((responseData) => {
                     _account.token = responseData.token
-                    return Storage.saveAccount(_account).then(fetchFromServer).then(updateNotesStorage).then(() => this.emitChange());
+                    return Storage.saveAccount(_account).then(syncWithServer).then(updateNotesStorage).then(() => this.emitChange());
                 }).catch(fetchError)
         })
     },
