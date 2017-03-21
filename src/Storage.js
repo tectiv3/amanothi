@@ -17,6 +17,7 @@ function loadAccountFromStorage() {
             _account = {};
         else
             _account = JSON.parse(str);
+        console.log("Load account:", _account);
         if (!_account.settings) {
             _account.settings = {};
         }
@@ -101,8 +102,8 @@ function loadNotesFromStorage() {
 
 function updateNotesStorage() {
     console.log("updateNotesStorage")
+    if (!_notes) return AsyncStorage.setItem('enotes', "");
     var password = _account.password;
-    if (!_notes) return;
     var promises = _notes.map((note) => encryptNote(note, password));
     return Promise.all(promises).then(function(encrypted) {
         return AsyncStorage.setItem('enotes', JSON.stringify(encrypted))
@@ -227,11 +228,15 @@ function decryptNote(note, key) {
             var keys = result
             var keyParams = encryptionComponentsFromString(encryptedItemKey, keys.mk, keys.encryptionKey, keys.authKey);
             // console.log("keyParams", keyParams);
-            var item_key = await decryptText(keyParams, requiresAuth);
-            console.log("item_key after decryptText:", item_key);
-            if (!item_key) {
-                return reject("decrypt error");
+            try {
+                var item_key = await decryptText(keyParams, requiresAuth);
+            } catch (e) {
+                return reject("key decrypt error");
             }
+            if (!item_key) {
+                return reject("key decrypt error");
+            }
+            console.log("item_key after decryptText:", item_key);
 
             // decrypt content
             var ek = item_key.substring(0, 64);
@@ -241,9 +246,13 @@ function decryptNote(note, key) {
             if (!itemParams.authHash) {
                 itemParams.authHash = note.auth_hash;
             }
-            var content = await decryptText(itemParams, false);
+            try {
+                var content = await decryptText(itemParams, false);
+            } catch (e) {
+                return reject("text decrypt error")
+            }
             if (!content) {
-                return reject("decrypt error")
+                return reject("text decrypt error")
             }
             var json = JSON.parse(content);
             note.text = json.text
@@ -322,13 +331,14 @@ var Storage = assign({}, EventEmitter.prototype, {
     },
 
     saveAccount: function(data) {
-        if (data.password != _account.password) {
+        if (data.password != _account.password && data.password != "") {
             console.log("password changed", data)
             return Aes.pbkdf2(data.password, data.params.pw_salt).then((hash) => {
-                console.log("hash:", hash)
+                console.log("pw hash:", hash)
                 data.password = hash.substring(0, 64);
                 data.mk = hash.substring(64);
                 data.settings = _account.settings;
+                data.params = _account.params;
                 _account = data;
                 console.log('account:', _account);
             }).then(updateAccountStorage).then(() => {
@@ -339,6 +349,7 @@ var Storage = assign({}, EventEmitter.prototype, {
             });
         } else {
             data.settings = _account.settings;
+            data.params = _account.params;
             _account = data;
             return updateAccountStorage().catch(err => {
                 console.log("account save error: ", err)
@@ -401,9 +412,21 @@ var Storage = assign({}, EventEmitter.prototype, {
                 .then(fetchStatus).then((response) => response.json())
                 .then((responseData) => {
                     _account.token = responseData.token
-                    return Storage.saveAccount(_account).then(fetchFromServer).then(updateNotesStorage).then(() => this.emitChange);
+                    return Storage.saveAccount(_account).then(fetchFromServer).then(updateNotesStorage).then(() => this.emitChange());
                 }).catch(fetchError)
         })
+    },
+
+    logoutUser: function() {
+        return Storage.saveAccount({
+            password: "",
+            email: "",
+            server: _account.server,
+            params: []
+        }).then(() => {
+            _notes = [];
+            updateNotesStorage().then(() => this.emitChange()).catch(fetchError)
+        });
     },
 
     saveSetting: function(item, value) {

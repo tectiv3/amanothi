@@ -31,7 +31,8 @@ export default class Account extends Component {
             email: account.email != undefined ? account.email : "",
             password: account.password,
             showProgress: false,
-            TouchID_enabled: account.settings && account.settings.TouchID_enabled
+            TouchID_enabled: account.settings && account.settings.TouchID_enabled,
+            hasToken: account.token != undefined && account.token != ""
         }
         this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
         this.handleSwitchTouchid = this.handleSwitchTouchid.bind(this);
@@ -40,12 +41,25 @@ export default class Account extends Component {
     onNavigatorEvent(event) {
         if (event.id == 'close') {
             this.props.navigator.dismissModal();
-            Storage.saveAccount({
-                password: this.state.password,
-                email: this.state.email,
-                server: this.state.server
-            });
         }
+    }
+
+    onLogoutPressed() {
+        this.setState({
+            showProgress: true
+        })
+        Storage.logoutUser().then(() => {
+            this.setState({
+                showProgress: false
+            });
+            this.props.navigator.dismissModal();
+        }).catch((error) => {
+            this.setState({
+                showProgress: false,
+                error: error.message
+            });
+            console.log('logout failed', error.message)
+        })
     }
 
     async onLoginPressed() {
@@ -145,6 +159,29 @@ export default class Account extends Component {
         });
     }
 
+    renderLogout() {
+        return (
+            <View style={ styles.flexRow }>
+                <TouchableHighlight onPress={ this.onLogoutPressed.bind(this) } style={ styles.accountButton }>
+                    <Text style={ styles.accountButtonText }>Logout</Text>
+                </TouchableHighlight>
+            </View>
+        )
+    }
+
+    renderLogin() {
+        return (
+            <View style={ styles.flexRow }>
+                <TouchableHighlight onPress={ this.onLoginPressed.bind(this) } style={ styles.accountButton }>
+                    <Text style={ styles.accountButtonText }>Login</Text>
+                </TouchableHighlight>
+                <TouchableHighlight onPress={ this.onRegisterPressed.bind(this) } style={ styles.accountButton }>
+                    <Text style={ styles.accountButtonText }>Register</Text>
+                </TouchableHighlight>
+            </View>
+        )
+    }
+
     render() {
         return (
             <View style={ styles.accountContainer }>
@@ -158,25 +195,18 @@ export default class Account extends Component {
                 <View style={ styles.sectionWrapper }>
                     <Text style={ styles.accountTitle }>Account</Text>
                     <TextInput onChangeText={ (text)=> this.setState({password: text}) } style={ styles.accountInput } autoCorrect={ false } autoCapitalize="none" placeholderTextColor={ 'rgba(249,247,247,0.3)' }
-                        placeholder={ "Password" } returnKeyType="next" secureTextEntry={ true } editable={ true } value={ this.state.password }>
+                        placeholder={ "Password" } returnKeyType="next" secureTextEntry={ true } editable={ !this.state.hasToken } value={ this.state.password }>
                     </TextInput>
                     <TextInput onChangeText={ (text)=> this.setState({email: text}) } style={ styles.accountInput } autoCorrect={ false } autoCapitalize="none" placeholderTextColor={ 'rgba(249,247,247,0.3)' }
-                        keyboardType="email-address" placeholder="E-mail (optional)" returnKeyType="next" value={ this.state.email }>
+                        keyboardType="email-address" placeholder="E-mail (optional)" returnKeyType="next" editable={ !this.state.hasToken } value={ this.state.email }>
                     </TextInput>
                     <TextInput onChangeText={ (text)=> this.setState({server: text}) } style={ styles.accountInput } autoCorrect={ false } autoCapitalize="none" placeholderTextColor={ 'rgba(249,247,247,0.3)' }
-                        keyboardType="url" placeholder="Server URL (optional)" value={ this.state.server }>
+                        keyboardType="url" placeholder="Server URL (optional)" editable={ !this.state.hasToken } value={ this.state.server }>
                     </TextInput>
                     <Text style={ styles.accountError }>
                         { this.state.error }
                     </Text>
-                    <View style={ styles.flexRow }>
-                        <TouchableHighlight onPress={ this.onLoginPressed.bind(this) } style={ styles.accountButton }>
-                            <Text style={ styles.accountButtonText }>Login</Text>
-                        </TouchableHighlight>
-                        <TouchableHighlight onPress={ this.onRegisterPressed.bind(this) } style={ styles.accountButton }>
-                            <Text style={ styles.accountButtonText }>Register</Text>
-                        </TouchableHighlight>
-                    </View>
+                    { this.state.hasToken ? this.renderLogout() : this.renderLogin() }
                 </View>
                 <ActivityIndicator animating={ this.state.showProgress } size="large" style={ styles.accountLoader } />
             </View>
