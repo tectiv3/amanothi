@@ -100,11 +100,13 @@ function loadNotesFromStorage() {
     });
 }
 
-function updateNotesStorage() {
+async function updateNotesStorage() {
     console.log("updateNotesStorage")
     if (!_notes) return AsyncStorage.setItem('enotes', "");
-    var password = _account.password;
-    var promises = _notes.map((note) => encryptNote(note, password));
+    if (_account.mk == undefined || _account.mk == "") {
+        await generateDefaultMK();
+    }
+    var promises = _notes.map((note) => encryptNote(note, _account.mk));
     return Promise.all(promises).then(function(encrypted) {
         return AsyncStorage.setItem('enotes', JSON.stringify(encrypted))
             .catch(err => {
@@ -138,41 +140,18 @@ function generateUUID() {
     return uuid;
 }
 
-async function decryptItem(cipher, key) {
-    var result = null;
+async function generateDefaultMK() {
     try {
-        result = await Aes.decrypt(cipher, key);
+        pw_salt = await Aes.sha1(generateRandomKey());
     } catch (e) {
-        //doesn't catch reject
-        console.log(e);
+        throw new Error(e.message)
     }
-    return result;
-}
-
-function encryptionComponentsFromString(string, baseKey, encryptionKey, authKey) {
-    var encryptionVersion = string.substring(0, 3);
-    if (encryptionVersion === "001") {
-        return {
-            contentCiphertext: string.substring(3),
-            encryptionVersion: encryptionVersion,
-            ciphertextToAuth: string,
-            iv: null,
-            authHash: null,
-            encryptionKey: baseKey,
-            authKey: authKey
-        }
-    } else {
-        let components = string.split(":");
-        return {
-            encryptionVersion: components[0],
-            authHash: components[1],
-            iv: components[2],
-            contentCiphertext: components[3],
-            ciphertextToAuth: [components[0], components[2], components[3]].join(":"),
-            encryptionKey: encryptionKey,
-            authKey: authKey
-        }
-    }
+    var hash = await Aes.pbkdf2(generateRandomKey(), pw_salt);
+    console.log("pw hash:", hash)
+    return Storage.saveAccount({
+        password: hash.substring(0, 64),
+        mk: hash.substring(64),
+    })
 }
 
 async function createAuthParams(data) {
@@ -198,135 +177,62 @@ async function createAuthParams(data) {
     return Promise.resolve(params)
 }
 
-async function getKeys() {
-    if (!_account.encryptionKey) {
-        try {
-            _account.encryptionKey = await Aes.hmac256(_account.mk, toHex("e"));
-            _account.authKey = await Aes.hmac256(_account.mk, toHex("a"));
-        } catch (e) {
-            console.log("key generation error:", e.message)
-        }
-    }
-    return {
-        mk: _account.mk,
-        encryptionKey: _account.encryptionKey,
-        authKey: _account.authKey
-    };
-}
-
-async function decryptText({ciphertextToAuth, contentCiphertext, encryptionKey, iv, authHash, authKey} = {}, requiresAuth) {
-    if (requiresAuth && !authHash) {
-        console.error("Auth hash is required.");
-        return;
-    }
-
-    console.log("authHash:", authHash);
-    if (authHash) {
-        try {
-            let hash = await Aes.hmac256(ciphertextToAuth, authKey);
-            console.log("hmac:", hash);
-            if (authHash !== hash) {
-                console.log("Hmac doesn't match.")
-                return ""
-            }
-        } catch (e) {
-            console.log("Hmac error", e);
-        }
-    }
-
-    return await Aes.decrypt(contentCiphertext, encryptionKey)
-}
-
-function decryptNote(note, key) {
+function decryptNote(note, mk) {
     return new Promise(function(resolve, reject) {
-        console.log("note_enc:", note.enc_item_key, "key:", key);
-        var encryptedItemKey = note.enc_item_key;
-        var requiresAuth = true;
-        if (encryptedItemKey.startsWith("002") === false) {
-            // legacy encryption type, has no prefix
-            encryptedItemKey = "001" + encryptedItemKey;
-            requiresAuth = false;
-        }
-        getKeys().then(async(result) => {
-            var keys = result
-            var keyParams = encryptionComponentsFromString(encryptedItemKey, keys.mk, keys.encryptionKey, keys.authKey);
-            // console.log("keyParams", keyParams);
-            try {
-                var item_key = await decryptText(keyParams, requiresAuth);
-            } catch (e) {
-                return reject("key decrypt error");
-            }
-            if (!item_key) {
-                return reject("key decrypt error");
-            }
-            console.log("item_key after decryptText:", item_key);
+        let components = note.enc_item_key.split(":");
+        var enc_version = components[0];
+        var enc_item_key = components[1];
+        var iv = components[2];
 
-            // decrypt content
-            var ek = item_key.substring(0, 64);
-            var ak = item_key.substring(64);
-            var itemParams = encryptionComponentsFromString(note.content, ek, ek, ak);
-            console.log("itemParams", itemParams, note.auth_hash);
-            if (!itemParams.authHash) {
-                itemParams.authHash = note.auth_hash;
-            }
+        Aes.decrypt(enc_item_key, mk, iv).then(async(note_key) => {
+            console.log("Decrypted note key:", note_key)
+            console.log("note:", note);
             try {
-                var content = await decryptText(itemParams, false);
-            } catch (e) {
-                return reject("text decrypt error")
-            }
-            if (!content) {
-                return reject("text decrypt error")
-            }
-            var json = JSON.parse(content);
-            note.text = json.text
-            note.title = json.title
-            console.log(content, note);
-            resolve(note)
-        })
-    /*
-            Aes.decrypt(note.enc_item_key, key).then(async(note_key) => {
-                console.log("Decrypted note key:", note_key)
-                console.log("note:", note);
-                try {
-                    let hash = await Aes.hmac256(note.content, key);
-                    if (hash !== note.hash) {
-                        console.log("Hmac doesn't match.")
-                        reject("Hmac doesn't match");
-                    }
-                    return Aes.decrypt(note.content, note_key)
-                        .then((result) => resolve(result))
-                        .catch((err) => console.log("Decrypt error:", err));
-                } catch (e) {
-                    reject("Hash error");
+                let hash = await Aes.hmac256(note.content, mk);
+                if (hash !== note.auth_hash) {
+                    reject("Hmac doesn't match");
                 }
-            }).catch((err) => console.log("Decrypt error:", err));
-            */
+                return Aes.decrypt(note.content, note_key, iv)
+                    .then((result) => resolve(result))
+                    .catch((err) => console.log("Decrypt error:", err));
+            } catch (e) {
+                reject("Hash error", e);
+            }
+        }).catch((err) => console.log("Decrypt error:", err));
     });
 }
 
-async function encryptNote(note, key) {
+async function encryptNote(note, mk) {
     //if key is still to be set, throw an alert
     if (!note.uuid) {
         note.uuid = generateUUID();
     }
-    var note_key = generateRandomKey();
-    note.key = await Aes.encrypt(note_key, key);
-
-    var p = new Promise(function(resolve, reject) {
-        Aes.encrypt("e001" + JSON.stringify(note), note_key).then(
-            cipher => {
-                var copy = {};
-                copy.uuid = note.uuid;
-                copy.content = cipher;
-                copy.key = note.key;
-                copy.updated_at = note.updated_at;
-                Aes.hmac256(copy.content, key).then(hash => {
-                    copy.hash = hash;
-                    resolve(copy);
-                });
+    try {
+        var note_key = await Aes.sha256(generateRandomKey());
+        var iv = await Aes.sha256(generateRandomKey());
+        var enc_item_key = await Aes.encrypt(note_key, mk, iv);
+        console.log("Note keys and iv:", note_key, enc_item_key, iv);
+    } catch (e) {
+        console.log("key encrypt error:", e)
+        return Promise.reject(e)
+    }
+    return new Promise(function(resolve, reject) {
+        console.log("Encrypting:", note)
+        Aes.encrypt(JSON.stringify(note), note_key, iv).then((cipher) => {
+            var copy = {};
+            copy.uuid = note.uuid;
+            copy.created_at = note.created_at;
+            copy.updated_at = note.updated_at;
+            copy.content = cipher;
+            copy.content_type = "Note";
+            copy.enc_item_key = "001:" + enc_item_key + ":" + iv;
+            copy.deleted = note.deleted;
+            Aes.hmac256(copy.content, mk).then((hash) => {
+                copy.auth_hash = hash;
+                resolve(copy);
             });
-    });
-    return p;
+        });
+    })
 }
 
 function toHex(str) {
@@ -509,7 +415,7 @@ var Storage = assign({}, EventEmitter.prototype, {
         })
         return Promise.all(promises).then((results) => {
             results.forEach(function(item) {
-                _notes.push(item);
+                _notes.push(JSON.parse(item));
             })
             Storage.emitChange()
         })
