@@ -76,10 +76,9 @@ export default class Note extends Component {
     }
 
     handleDeletePress() {
-        console.log("Delete press", this.props.note);
+        console.log("Delete press");
         if (this.props.note.uuid) {
             var note = Object.assign({}, this.props.note);
-            note.deleted = new Date().toISOString();
             Storage.deleteNote(note);
         }
         this.props.navigator.popToRoot();

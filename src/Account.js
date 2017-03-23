@@ -27,7 +27,7 @@ export default class Account extends Component {
         super(props);
         var account = Storage.getAccount();
         this.state = {
-            server: account.server != undefined ? account.server : "",
+            server: account.server != undefined ? account.server : "https://sf.amanothi.com",
             email: account.email != undefined ? account.email : "",
             password: account.password,
             showProgress: false,
