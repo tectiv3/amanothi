@@ -1,4 +1,4 @@
-import { AsyncStorage, NativeModules } from 'react-native';
+import { AsyncStorage, NativeModules, InteractionManager } from 'react-native';
 var assign = require('object-assign');
 const fetchWithRetries = require('fbjs/lib/fetchWithRetries');
 var EventEmitter = require('events').EventEmitter;
@@ -56,6 +56,15 @@ function getAuthParams(server, email) {
         .catch(fetchError)
 }
 
+function findNoteIndex(uuid) {
+    for (var j = 0; j < _notes.length; j++) {
+        if (_notes[j].uuid == uuid) {
+            return j;
+        }
+    }
+    return -1;
+}
+
 async function syncWithServer() {
     console.log("syncWithServer", _account.server)
     if (_account.server == "" || _account.server == undefined) {
@@ -95,25 +104,59 @@ async function syncWithServer() {
     return fetchWithRetries(_account.server + "/items/sync", init)
         .then(fetchStatus).then((response) => response.json()).catch(fetchError)
         .then((responseData) => {
-            // console.log('response object:', responseData)
             // it's time to switch to some kind of a DB
             if (responseData.saved_items.length > 0) {
-                for (var i = 0; i < responseData.saved_items.length; i++) {
-                    var note = responseData.saved_items[i]
-                    for (var j = 0; j < _notes.length; j++) {
-                        if (_notes[j].uuid == note.uuid) {
-                            _notes[j].dirty = false;
-                            break;
-                        }
+                responseData.saved_items.forEach((remote) => {
+                    let index = findNoteIndex(remote.uuid);
+                    if (index >= 0) {
+                        console.log("Updating existing:", remote.uuid);
+                        _notes[index].dirty = false;
+                        _notes[index].deleted = remote.deleted;
+                    }
+                });
+                Storage.emitChange()
+            }
+            var dirty = _notes.filter(note => note.dirty);
+            console.log("after sync, dirty:", dirty.length);
+            _account.sync_token = responseData.sync_token;
+
+            responseData.retrieved_items.forEach(function(remote) {
+                if (remote.deleted) {
+                    let index = findNoteIndex(remote.uuid);
+                    if (index >= 0) {
+                        console.log("Deleting existing:", remote.uuid);
+                        _notes[index].dirty = false;
+                        _notes[index].deleted = remote.deleted;
+                        Storage.emitChange();
                     }
                 }
-            }
-            return Storage.decryptNotes(responseData.retrieved_items).then(() => {
-                _account.sync_token = responseData.sync_token
-                var dirty = _notes.filter(note => note.dirty);
-                console.log("after sync, dirty:", dirty.length);
-                return Storage.saveAccount(_account)
-            })
+            });
+            return decryptNotes(responseData.retrieved_items).then((retrieved_items) => {
+                console.log("retrieved_items:", retrieved_items);
+                retrieved_items.forEach((item) => {
+                    let remote = JSON.parse(item);
+                    let exists = _notes.filter(local => local.uuid == remote.uuid);
+                    if (exists.length == 0) {
+                        console.log("Adding new one:", remote.uuid);
+                        remote.dirty = false;
+                        _notes.push(remote);
+                    } else {
+                        console.log("Updating existing:", remote.uuid);
+                        let index = findNoteIndex(remote.uuid);
+                        if (index >= 0) {
+                            _notes[index].dirty = false;
+                            _notes[index].text = remote.text;
+                            _notes[index].title = remote.title;
+                            _notes[index].updated_at = remote.updated_at;
+                        } else {
+                            console.log("Existing note not found", remote);
+                        }
+                    }
+                })
+                if (retrieved_items.length > 0) {
+                    Storage.emitChange()
+                }
+            }).then(() => Storage.saveAccount(_account)).then();
         })
         .catch((error) => {
             console.log(error)
@@ -131,11 +174,22 @@ function loadNotesFromStorage() {
     });
 }
 
+async function decryptNotes(encrypted) {
+    if (!encrypted) return Promise.resolve()
+    console.log("Encrypted:", encrypted.length)
+    var promises = [];
+    encrypted.forEach(function(note) {
+        if (!note.deleted && note.content_type == "Note") {
+            promises.push(decryptNote(note, _account.mk));
+        }
+    })
+    return Promise.all(promises).catch(err => console.log("Mass encrypt failed:", err));
+}
+
 async function encryptNotes() {
+    console.log("encryptNotes")
     var promises = _notes.map((note) => encryptNote(note, _account.mk));
-    return Promise.all(promises).catch((err) => {
-        console.log("Mass encrypt failed:", err);
-    });
+    return Promise.all(promises).catch(err => console.log("Mass encrypt failed:", err));
 }
 
 async function updateNotesStorage() {
@@ -224,11 +278,11 @@ async function decryptNote(note, mk) {
                 }
                 return Aes.decrypt(note.content, note_key, iv)
                     .then((result) => resolve(result))
-                    .catch((err) => console.log("Decrypt error:", err));
+                    .catch(err => console.log("Decrypt error:", err));
             } catch (e) {
                 reject("Hash error", e);
             }
-        }).catch((err) => console.log("Decrypt error:", err));
+        }).catch(err => console.log("Key decrypt error:", err));
     });
 }
 
@@ -278,6 +332,11 @@ var Storage = assign({}, EventEmitter.prototype, {
         if (!_notes) {
             console.log("Get notes call.");
             loadNotesFromStorage().then(() => this.sync("getAll"));
+            setInterval(function() {
+                InteractionManager.runAfterInteractions(() => {
+                    Storage.sync("Timer");
+                });
+            }, 30000);
             return [];
         }
         return _notes;
@@ -437,17 +496,12 @@ var Storage = assign({}, EventEmitter.prototype, {
     },
 
     decryptNotes: function(encrypted) {
-        var promises = []
-        if (!encrypted) return Promise.resolve()
-        console.log("Encrypted notes:", encrypted.length)
-        encrypted.forEach(function(note) {
-            if (!note.deleted && note.content_type == "Note") {
-                promises.push(decryptNote(note, _account.mk));
-            }
-        })
-        return Promise.all(promises).then((results) => {
-            results.forEach(function(item) {
-                _notes.push(JSON.parse(item));
+        return decryptNotes(encrypted).then((results) => {
+            results.forEach((item) => {
+                let note = JSON.parse(item)
+                if (typeof note === 'object') {
+                    _notes.push(note);
+                }
             })
             Storage.emitChange()
         })
