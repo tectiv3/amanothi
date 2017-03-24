@@ -144,7 +144,7 @@ export default class Main extends Component {
     sortList(notes) {
         console.log('Sorting...')
         //hide deleted here todo:unless in trash bin then the opposite
-        notes = notes.filter(note => !note.deleted);
+        // notes = notes.filter(note => !note.deleted);
         notes.sort(function(a, b) {
             var dateA = new Date(a.updated_at),
                 dateB = new Date(b.updated_at);
@@ -200,8 +200,8 @@ export default class Main extends Component {
             <View style={ styles.page }>
                 <ListView ref="list" dataSource={ this.state.dataSource } renderHeader={ () => <Header onChange={ this.handleSearchChange } /> } renderRow={ (rowData, sectionID, rowID) => <NoteItem onPress={ this.pressRow } note={ rowData } /> } enableEmptySections={ true } />
                 <View style={ {alignSelf:'center'} }>
-                    <Text style={ {color: 'red', fontSize: 11} }>
-                        { 'Notes count: ' + this.state.notes.filter(note => !note.deleted).length+' [Total: '+this.state.notes.length+']' }
+                    <Text style={ {color: 'green', fontSize: 11} }>
+                        { 'Notes count: ' + this.state.notes.length }
                     </Text>
                 </View>
             </View>

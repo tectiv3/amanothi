@@ -1,11 +1,12 @@
 import { AsyncStorage, NativeModules, InteractionManager } from 'react-native';
+import Store from 'react-native-store';
 var assign = require('object-assign');
 const fetchWithRetries = require('fbjs/lib/fetchWithRetries');
 var EventEmitter = require('events').EventEmitter;
 var Aes = NativeModules.Aes;
 
 var _notes = null;
-var _encrypted = [];
+var _interval = null;
 var _account = null;
 var _online = true;
 var _sync_token = "";
@@ -13,10 +14,16 @@ var _sync_token = "";
 
 loadAccountFromStorage();
 
+const DB = {
+    'account': Store.model('account'),
+    'note': Store.model('note')
+}
+
 function loadAccountFromStorage() {
     return AsyncStorage.getItem('account').then(str => {
         _account = !str ? {} : JSON.parse(str);
         console.log("Load account:", _account);
+        // DB.account.add(_account)
         if (!_account.settings) {
             _account.settings = {};
         }
@@ -56,43 +63,30 @@ function getAuthParams(server, email) {
         .catch(fetchError)
 }
 
-function findNoteIndex(uuid) {
-    for (var j = 0; j < _notes.length; j++) {
-        if (_notes[j].uuid == uuid) {
-            return j;
-        }
-    }
-    return -1;
-}
-
 async function syncWithServer() {
     console.log("syncWithServer", _account.server)
     if (_account.server == "" || _account.server == undefined) {
-        console.log("no server address")
-        return Promise.resolve()
+        return Promise.reject("no server address")
     }
-
     if (_account.token == "" || _account.token == undefined) {
-        console.log("not authorized")
-        return Promise.resolve()
+        return Promise.reject("not authorized")
     }
-
     if (!_online) {
-        console.log("not online")
-        return Promise.resolve()
+        return Promise.reject("not online")
     }
 
-    var data = {
+    let data = {
         items: [],
         sync_token: _account.sync_token
     }
-    if (_encrypted.length == 0) {
-        _encrypted = await encryptNotes();
-    }
-    data.items = _encrypted.filter(note => note.dirty);
+    data.items = await DB.note.find({
+        where: {
+            dirty: true
+        }
+    }).then(result => encryptNotes(result));
     console.log("sync, dirty:", data.items.length);
 
-    var init = {
+    const init = {
         body: JSON.stringify(data),
         method: 'POST',
         headers: {
@@ -102,76 +96,53 @@ async function syncWithServer() {
         },
     };
     return fetchWithRetries(_account.server + "/items/sync", init)
-        .then(fetchStatus).then((response) => response.json()).catch(fetchError)
-        .then((responseData) => {
-            // it's time to switch to some kind of a DB
+        .then(fetchStatus).then(response => response.json()).catch(fetchError)
+        .then(responseData => {
+            let promises = [];
             if (responseData.saved_items.length > 0) {
-                responseData.saved_items.forEach((remote) => {
-                    let index = findNoteIndex(remote.uuid);
-                    if (index >= 0) {
-                        console.log("Updating existing:", remote.uuid);
-                        _notes[index].dirty = false;
-                        _notes[index].deleted = remote.deleted;
+                promises.push(new Promise(async(resolve) => {
+                    let count = 0;
+                    for (var i = 0; i < responseData.saved_items.length; i++) {
+                        await updateMeta(responseData.saved_items[i]);
+                        count++;
                     }
-                });
-                Storage.emitChange()
+                    return resolve(count)
+                }))
             }
-            var dirty = _notes.filter(note => note.dirty);
-            console.log("after sync, dirty:", dirty.length);
-            _account.sync_token = responseData.sync_token;
-
-            responseData.retrieved_items.forEach(function(remote) {
-                if (remote.deleted) {
-                    let index = findNoteIndex(remote.uuid);
-                    if (index >= 0) {
-                        console.log("Deleting existing:", remote.uuid);
-                        _notes[index].dirty = false;
-                        _notes[index].deleted = remote.deleted;
-                        Storage.emitChange();
-                    }
-                }
-            });
-            return decryptNotes(responseData.retrieved_items).then((retrieved_items) => {
-                console.log("retrieved_items:", retrieved_items);
-                retrieved_items.forEach((item) => {
-                    let remote = JSON.parse(item);
-                    let exists = _notes.filter(local => local.uuid == remote.uuid);
-                    if (exists.length == 0) {
-                        console.log("Adding new one:", remote.uuid);
-                        remote.dirty = false;
-                        _notes.push(remote);
-                    } else {
-                        console.log("Updating existing:", remote.uuid);
-                        let index = findNoteIndex(remote.uuid);
-                        if (index >= 0) {
-                            _notes[index].dirty = false;
-                            _notes[index].text = remote.text;
-                            _notes[index].title = remote.title;
-                            _notes[index].updated_at = remote.updated_at;
-                        } else {
-                            console.log("Existing note not found", remote);
+            if (responseData.retrieved_items.length > 0) {
+                promises.push(new Promise(async(resolve) => {
+                    let count = 0;
+                    for (var i = 0; i < responseData.retrieved_items.length; i++) {
+                        if (responseData.retrieved_items[i].deleted) {
+                            await updateMeta(responseData.retrieved_items[i])
+                            count++;
                         }
                     }
-                })
-                if (retrieved_items.length > 0) {
-                    Storage.emitChange()
+                    return resolve(count)
+                }));
+                promises.push(decryptNotes(responseData.retrieved_items).then(async(results) => {
+                    let count = 0;
+                    for (var i = 0; i < results.length; i++) {
+                        let item = results[i];
+                        let remote = JSON.parse(item)
+                        if (typeof remote === 'object') {
+                            await updateOrCreateNote(remote);
+                            count++;
+                        }
+                    }
+                    return Promise.resolve(count)
+                }))
+            }
+            _account.sync_token = responseData.sync_token;
+            return Promise.all(promises).then(results => {
+                console.log("Sync results", results);
+                if (results != undefined && results.length > 0) {
+                    return Storage.reloadNotes().then(() => Storage.emitChange("Sync end"))
                 }
-            }).then(() => Storage.saveAccount(_account)).then();
+                return Promise.resolve();
+            }).then(() => Storage.saveAccount(_account));
         })
-        .catch((error) => {
-            console.log(error)
-        })
-}
-
-function loadNotesFromStorage() {
-    console.log("loadNotesFromStorage")
-    return AsyncStorage.getItem('enotes').then((str) => {
-        _notes = [];
-        let _encrypted = JSON.parse(str);
-        let unique = [...new Set(_encrypted.map(item => item.uuid))];
-        console.log("set:", unique)
-        return Storage.decryptNotes(_encrypted).catch(error => console.log(error));
-    });
+        .catch(err => console.log(err))
 }
 
 async function decryptNotes(encrypted) {
@@ -183,25 +154,16 @@ async function decryptNotes(encrypted) {
             promises.push(decryptNote(note, _account.mk));
         }
     })
-    return Promise.all(promises).catch(err => console.log("Mass encrypt failed:", err));
+    return Promise.all(promises).catch(err => console.log("Mass decrypt failed:", err));
 }
 
-async function encryptNotes() {
-    console.log("encryptNotes")
-    var promises = _notes.map((note) => encryptNote(note, _account.mk));
+async function encryptNotes(notes) {
+    if (!notes) {
+        return [];
+    }
+    console.log("Encrypt notes", notes.length)
+    var promises = notes.map((note) => encryptNote(note, _account.mk));
     return Promise.all(promises).catch(err => console.log("Mass encrypt failed:", err));
-}
-
-async function updateNotesStorage() {
-    console.log("updateNotesStorage")
-    if (!_notes) return AsyncStorage.setItem('enotes', "");
-    if (_account.mk == undefined || _account.mk == "") {
-        await generateDefaultMK();
-    }
-    if (_encrypted.length == 0) {
-        _encrypted = await encryptNotes();
-    }
-    return AsyncStorage.setItem('enotes', JSON.stringify(_encrypted)).catch(error => console.log(error));
 }
 
 function updateAccountStorage() {
@@ -270,6 +232,7 @@ async function decryptNote(note, mk) {
         var enc_version = components[0];
         var enc_item_key = components[1];
         var iv = components[2];
+
         Aes.decrypt(enc_item_key, mk, iv).then(async(note_key) => {
             try {
                 let hash = await Aes.hmac256(note.content, mk);
@@ -299,6 +262,8 @@ async function encryptNote(note, mk) {
         console.log("key encrypt error:", e)
         return Promise.reject(e)
     }
+    if (note._id)
+        delete note._id;
     return new Promise(function(resolve, reject) {
         Aes.encrypt(JSON.stringify(note), note_key, iv).then((cipher) => {
             var copy = {};
@@ -318,6 +283,51 @@ async function encryptNote(note, mk) {
     })
 }
 
+async function updateMeta(item) {
+    let note = await DB.note.get({
+        where: {
+            uuid: item.uuid
+        }
+    })
+    if (note == null) return null;
+    note = note[0];
+    console.log("Updating meta:", note.uuid);
+    if (note.uuid == undefined) {
+        return await DB.note.remove({
+                where: {
+                    _id: note._id
+                }
+            });
+    }
+    note.dirty = false;
+    note.deleted = item.deleted;
+    note.updated_at = item.updated_at;
+    return await DB.note.updateById(note, note._id);
+}
+
+async function updateOrCreateNote(remote) {
+    let note = await DB.note.get({
+        where: {
+            uuid: remote.uuid
+        }
+    });
+    if (note != null) {
+        note = note[0];
+        note.uuid = remote.uuid;
+        console.log("Updating existing", note.uuid);
+        note.updated_at = remote.updated_at;
+        note.dirty = false;
+        note.text = remote.text;
+        note.title = remote.title;
+        return await DB.note.updateById(note, note._id);
+    }
+    console.log("Adding new note", remote.uuid);
+    remote.dirty = false;
+    if (remote._id)
+        delete remote._id;
+    return await DB.note.add(remote);
+}
+
 function toHex(str) {
     var hex = '';
     for (var i = 0; i < str.length; i++) {
@@ -329,17 +339,29 @@ function toHex(str) {
 var Storage = assign({}, EventEmitter.prototype, {
 
     getAll: function() {
+        console.log("Get notes call.");
         if (!_notes) {
-            console.log("Get notes call.");
-            loadNotesFromStorage().then(() => this.sync("getAll"));
-            setInterval(function() {
-                InteractionManager.runAfterInteractions(() => {
-                    Storage.sync("Timer");
-                });
-            }, 30000);
+            this.reloadNotes().then(() => this.emitChange("getAll")).then(() => this.sync("Reload"));
+            if (!_interval) {
+                _interval = setInterval(function() {
+                    InteractionManager.runAfterInteractions(() => {
+                        Storage.sync("Timer");
+                    });
+                }, 30000);
+            }
             return [];
         }
         return _notes;
+    },
+
+    reloadNotes: function() {
+        _notes = [];
+        return DB.note.find({
+            where: {
+                deleted: false
+            }
+        }
+        ).then(result => _notes = result == null ? [] : result);
     },
 
     getAccount: function() {
@@ -348,30 +370,12 @@ var Storage = assign({}, EventEmitter.prototype, {
 
     saveAccount: function(data) {
         //TODO: total rewrite! account manager for keys generation, parameters and account and settings storage
-        // if (data.password != _account.password && data.password != "") {
-        //     console.log("password changed", data)
-        //     return Aes.pbkdf2(data.password, data.params.pw_salt).then((hash) => {
-        //         console.log("pw hash:", hash)
-        //         data.password = hash.substring(0, 64);
-        //         data.mk = hash.substring(64);
-        //         data.settings = _account.settings;
-        //         data.params = _account.params;
-        //         _account = data;
-        //         console.log('account:', _account);
-        //     }).then(updateAccountStorage).then(() => {
-        //         console.log('Re-encrypting notes');
-        //         updateNotesStorage(data.password);
-        //     }).catch(err => {
-        //         console.log("couldn't store account: ", err)
-        //     });
-        // } else {
         data.settings = _account.settings;
         data.params = data.params != undefined ? data.params : _account.params;
         _account = data;
         return updateAccountStorage().catch(err => {
             console.log("account save error: ", err)
         })
-    // }
     },
 
     registerUser: function(data) {
@@ -404,7 +408,7 @@ var Storage = assign({}, EventEmitter.prototype, {
                     .then(fetchStatus).then((response) => response.json())
                     .then((responseData) => {
                         _account.token = responseData.token
-                        return Storage.saveAccount(_account).then(syncWithServer).then(updateNotesStorage).then(() => this.emitChange());
+                        return Storage.saveAccount(_account).then(() => this.sync("Register"));
                     }).catch(fetchError)
             })
         })
@@ -412,7 +416,7 @@ var Storage = assign({}, EventEmitter.prototype, {
 
     loginUser: function(data) {
         return getAuthParams(data.server, data.email).then(async(params) => {
-            var hash = await Aes.pbkdf2(data.password, params.pw_salt);
+            let hash = await Aes.pbkdf2(data.password, params.pw_salt);
             console.log("pw hash:", hash)
             return Storage.saveAccount({
                 password: hash.substring(0, 64),
@@ -422,7 +426,7 @@ var Storage = assign({}, EventEmitter.prototype, {
                 params: params
             })
         }).then(() => {
-            var init = {
+            const init = {
                 body: JSON.stringify({
                     email: _account.email,
                     password: _account.password
@@ -437,8 +441,8 @@ var Storage = assign({}, EventEmitter.prototype, {
                 .then(fetchStatus).then((response) => response.json())
                 .then((responseData) => {
                     _account.token = responseData.token
-                    return Storage.saveAccount(_account).then(syncWithServer).then(updateNotesStorage).then(() => this.emitChange());
-                }).catch(fetchError)
+                    return Storage.saveAccount(_account).then(() => this.sync("Login"));
+                }).catch(fetchError);
         })
     },
 
@@ -450,7 +454,7 @@ var Storage = assign({}, EventEmitter.prototype, {
             params: []
         }).then(() => {
             _notes = [];
-            updateNotesStorage().then(() => this.emitChange()).catch(fetchError)
+            DB.note.remove().then(() => this.emitChange("Logout")).catch(fetchError)
         });
     },
 
@@ -459,62 +463,41 @@ var Storage = assign({}, EventEmitter.prototype, {
         return updateAccountStorage();
     },
 
-    createNote: function(note) {
+    createNote: async function(note) {
         note.created_at = new Date().toISOString();
         note.updated_at = note.created_at;
         note.uuid = generateUUID();
         note.deleted = false;
         note.dirty = true;
-        _notes.push(note);
-        this.emitChange();
+        let model = await DB.note.add(note);
+        _notes.push(model);
+        this.emitChange("Create");
         return this.sync("create");
     },
 
-    updateNote: function(note) {
+    updateNote: async function(note) {
         for (var i = 0; i < _notes.length; i++) {
             if (_notes[i].uuid == note.uuid) {
                 note.updated_at = new Date().toISOString();
                 note.dirty = true;
                 _notes[i] = note;
-                break;
+                return DB.note.updateById(note, note._id).then(() => this.emitChange("Update")).then(() => this.sync("update"));
             }
         }
-        this.emitChange();
-        return this.sync("update");
     },
 
-    deleteNote: function(note) {
-        for (var i = 0; i < _notes.length; i++) {
-            if (_notes[i].uuid == note.uuid) {
-                note.deleted = true;
-                note.dirty = true;
-                _notes[i] = note;
-            }
-        }
-        this.emitChange();
-        return this.sync("delete");
+    deleteNote: async function(note) {
+        note.deleted = true;
+        return this.updateNote(note);
     },
 
-    decryptNotes: function(encrypted) {
-        return decryptNotes(encrypted).then((results) => {
-            results.forEach((item) => {
-                let note = JSON.parse(item)
-                if (typeof note === 'object') {
-                    _notes.push(note);
-                }
-            })
-            Storage.emitChange()
-        })
-    },
-
-    sync: function(caller) {
+    sync: async function(caller) {
         console.log("Storage.sync!", caller);
-        return syncWithServer().then(updateNotesStorage);
+        return syncWithServer().catch(err => console.log(err));
     },
 
-    emitChange: function() {
-        console.log("Change fire!");
-        _encrypted = [];
+    emitChange: function(caller) {
+        console.log("Change fire!", caller, _notes.length);
         this.emit('change');
     },
 
